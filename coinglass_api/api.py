@@ -24,6 +24,7 @@ class CoinglassAPI:
 
     @staticmethod
     def _create_dataframe(data: list[dict], time_col: str) -> pd.DataFrame:
+        """ Create pandas DataFrame from list of dicts """
         df = pd.DataFrame(data)
         df["time"] = pd.to_datetime(df[time_col], unit="ms")
         df.drop(columns=[time_col], inplace=True)
@@ -32,6 +33,12 @@ class CoinglassAPI:
         if "t" in df.columns:
             df.drop(columns=["t"], inplace=True)
         return df
+
+    @staticmethod
+    def _check_for_errors(response: dict) -> None:
+        """ Check for errors in response """
+        if not response["success"]:
+            raise Exception(f"Code {response['code']}: {response['msg']}")
 
     def funding(
             self,
@@ -46,8 +53,8 @@ class CoinglassAPI:
         Funding rate for a given pair
 
         Args:
-            ex: exchange to get funding rate for (e.g. Binance, Okex, etc.)
-            pair: pair to get funding rate for (e.g. BTCUSDT, ETHUSDT, etc.)
+            ex: exchange to get funding rate for (e.g. Binance, dYdX, etc.)
+            pair: pair to get funding rate for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
             interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
             limit: number of data points to return
             start_time: start time in milliseconds
@@ -56,11 +63,13 @@ class CoinglassAPI:
         Returns:
             pandas DataFrame with funding rate
         """
-        data = self._get(
+        response = self._get(
             endpoint="funding",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
-        )["data"]
+        )
+        self._check_for_errors(response)
+        data = response["data"]
         return self._create_dataframe(data, time_col="createTime")
 
     def funding_ohlc(
@@ -76,8 +85,8 @@ class CoinglassAPI:
         Funding rate in OHLC format for an exchange pair
 
         Args:
-            ex: exchange to get funding rate for (e.g. Binance, Okex, etc.)
-            pair: pair to get funding rate for (e.g. BTCUSDT, ETHUSDT, etc.)
+            ex: exchange to get funding rate for (e.g. Binance, dYdX, etc.)
+            pair: pair to get funding rate for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
             interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
             limit: number of data points to return
             start_time: start time in milliseconds
@@ -86,11 +95,13 @@ class CoinglassAPI:
         Returns:
             pandas DataFrame with funding rate in OHLC format for an exchange pair
         """
-        data = self._get(
+        response = self._get(
             endpoint="funding_ohlc",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
-        )["data"]
+        )
+        self._check_for_errors(response)
+        data = response["data"]
         return self._create_dataframe(data, time_col="t")
 
     def funding_average(
@@ -114,11 +125,13 @@ class CoinglassAPI:
         Returns:
             pandas DataFrame with funding rate
         """
-        data = self._get(
+        response = self._get(
             endpoint="funding_avg",
             params={"symbol": symbol, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
-        )["data"]
+        )
+        self._check_for_errors(response)
+        data = response["data"]
         return self._create_dataframe(data, time_col="createTime")
 
     def open_interest_ohlc(
@@ -134,8 +147,8 @@ class CoinglassAPI:
         Open interest in OHLC format for an exchange pair
 
         Args:
-            ex: exchange to get OI for (e.g. Binance, Okex, etc.)
-            pair: pair to get OI for (e.g. BTCUSDT, ETHUSDT, etc.)
+            ex: exchange to get OI for (e.g. Binance, dYdX, etc.)
+            pair: pair to get OI for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
             interval: interval to get OI for (e.g. m1, m5, m15, m30, h1, h4, etc.)
             limit: number of data points to return
             start_time: start time in milliseconds
@@ -144,11 +157,13 @@ class CoinglassAPI:
         Returns:
             pandas DataFrame with open interest in OHLC format for an exchange pair
         """
-        data = self._get(
+        response = self._get(
             endpoint="open_interest_ohlc",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
-        )["data"]
+        )
+        self._check_for_errors(response)
+        data = response["data"]
         return self._create_dataframe(data, time_col="t")
 
     def open_interest_aggregated_ohlc(
@@ -172,11 +187,13 @@ class CoinglassAPI:
         Returns:
             pandas DataFrame with aggregated open interest in OHLC format
         """
-        data = self._get(
+        response = self._get(
             endpoint="open_interest_aggregated_ohlc",
             params={"symbol": symbol, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
-        )["data"]
+        )
+        self._check_for_errors(response)
+        data = response["data"]
         return self._create_dataframe(data, time_col="t")
 
     def liquidation_symbol(
@@ -200,11 +217,13 @@ class CoinglassAPI:
         Returns:
             pandas DataFrame with liquidation data
         """
-        data = self._get(
+        response = self._get(
             endpoint="liquidation_symbol",
             params={"symbol": symbol, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
-        )["data"]
+        )
+        self._check_for_errors(response)
+        data = response["data"]
         return self._create_dataframe(data, time_col="createTime")
 
     def liquidation_pair(
@@ -220,8 +239,8 @@ class CoinglassAPI:
         Liquidation data for an exchange pair
 
         Args:
-            ex: exchange to get liquidation data for (e.g. Binance, Okex, etc.)
-            pair: pair to get liquidation data for (e.g. BTCUSDT, ETHUSDT, etc.)
+            ex: exchange to get liquidation data for (e.g. Binance, dYdX, etc.)
+            pair: pair to get liquidation data for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
             interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
             limit: number of data points to return
             start_time: start time in milliseconds
@@ -230,11 +249,13 @@ class CoinglassAPI:
         Returns:
             pandas DataFrame with liquidation data for an exchange pair
         """
-        data = self._get(
+        response = self._get(
             endpoint="funding_ohlc",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
-        )["data"]
+        )
+        self._check_for_errors(response)
+        data = response["data"]
         return self._create_dataframe(data, time_col="t")
 
     def long_short_accounts(
@@ -246,11 +267,13 @@ class CoinglassAPI:
             start_time: int = None,
             end_time: int = None
     ) -> pd.DataFrame:
-        data = self._get(
+        response = self._get(
             endpoint="long_short_accounts",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
-        )["data"]
+        )
+        self._check_for_errors(response)
+        data = response["data"]
         return self._create_dataframe(data, time_col="createTime")
 
     def long_short_symbol(
@@ -274,9 +297,11 @@ class CoinglassAPI:
         Returns:
             pandas DataFrame with long/short ratio
         """
-        data = self._get(
+        response = self._get(
             endpoint="long_short_symbol",
             params={"symbol": symbol, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
-        )["data"]
+        )
+        self._check_for_errors(response)
+        data = response["data"]
         return self._create_dataframe(data, time_col="t")
