@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "coinglass-api"
+version = "0.1.0"
+repository = "https://github.com/dineshpinto/coinglass-api"
+homepage = "https://github.com/dineshpinto/coinglass-api"
+license = "MIT"
+keywords = ["coinglass", "api", "crypto", "cryptocurrency"]
+description = "Unofficial Python client for Coinglass API"
+authors = ["dineshpinto <dkpinto95@gmail.com>"]
+readme = "README.md"
+packages = [{include = "coinglass_api"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^1.5.2"
+requests = "^2.28.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
