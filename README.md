@@ -1,5 +1,5 @@
 # Coinglass API
-[![PyPi version](https://img.shields.io/pypi/v/coinglass-api.svg)](https://pypi.python.org/pypi/coinglass-api/)
+[![PyPi version](https://img.shields.io/pypi/v/coinglass-api)](https://pypi.python.org/pypi/coinglass-api/)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100//)
 ## Unofficial Python client for Coinglass API
 
