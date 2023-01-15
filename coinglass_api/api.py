@@ -11,7 +11,7 @@ class CoinglassAPI:
             api_key: key from Coinglass, get one at https://www.coinglass.com/pricing
         """
         self.__api_key = api_key
-        self.base_url = "https://open-api.coinglass.com/public/v2/indicator/"
+        self._base_url = "https://open-api.coinglass.com/public/v2/indicator/"
         self._session = requests.Session()
 
     def _get(self, endpoint: str, params: dict = None) -> dict:
@@ -19,21 +19,85 @@ class CoinglassAPI:
             "accept": "application/json",
             "coinglassSecret": self.__api_key
         }
-        url = self.base_url + endpoint
+        url = self._base_url + endpoint
         return self._session.request('GET', url, params=params, headers=headers, timeout=30).json()
 
     @staticmethod
     def _create_dataframe(data: list[dict], time_col: str) -> pd.DataFrame:
         df = pd.DataFrame(data)
-        df[time_col] = pd.to_datetime(df[time_col], unit="ms")
-        df.set_index(time_col, inplace=True, drop=True)
+        df["time"] = pd.to_datetime(df[time_col], unit="ms")
+        df.drop(columns=[time_col], inplace=True)
+        df.set_index("time", inplace=True, drop=True)
+
+        if "t" in df.columns:
+            df.drop(columns=["t"], inplace=True)
         return df
 
-    def average_funding(
+    def funding(
+            self,
+            ex: str,
+            pair: str,
+            interval: str,
+            limit: int = 500,
+            start_time: int = None,
+            end_time: int = None
+    ) -> pd.DataFrame:
+        """
+        Funding rate for a given pair
+
+        Args:
+            ex: exchange to get funding rate for (e.g. Binance, Okex, etc.)
+            pair: pair to get funding rate for (e.g. BTCUSDT, ETHUSDT, etc.)
+            interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            limit: number of data points to return
+            start_time: start time in milliseconds
+            end_time: end time in milliseconds
+
+        Returns:
+            pandas DataFrame with funding rate
+        """
+        data = self._get(
+            endpoint="funding",
+            params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
+                    "start_time": start_time, "end_time": end_time}
+        )["data"]
+        return self._create_dataframe(data, time_col="createTime")
+
+    def funding_ohlc(
+            self,
+            ex: str,
+            pair: str,
+            interval: str,
+            limit: int = 500,
+            start_time: int = None,
+            end_time: int = None
+    ) -> pd.DataFrame:
+        """
+        Funding rate in OHLC format for an exchange pair
+
+        Args:
+            ex: exchange to get funding rate for (e.g. Binance, Okex, etc.)
+            pair: pair to get funding rate for (e.g. BTCUSDT, ETHUSDT, etc.)
+            interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            limit: number of data points to return
+            start_time: start time in milliseconds
+            end_time: end time in milliseconds
+
+        Returns:
+            pandas DataFrame with funding rate in OHLC format for an exchange pair
+        """
+        data = self._get(
+            endpoint="funding_ohlc",
+            params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
+                    "start_time": start_time, "end_time": end_time}
+        )["data"]
+        return self._create_dataframe(data, time_col="t")
+
+    def funding_average(
             self,
             symbol: str,
             interval: str,
-            limit: int = None,
+            limit: int = 500,
             start_time: int = None,
             end_time: int = None
     ) -> pd.DataFrame:
@@ -57,11 +121,41 @@ class CoinglassAPI:
         )["data"]
         return self._create_dataframe(data, time_col="createTime")
 
+    def open_interest_ohlc(
+            self,
+            ex: str,
+            pair: str,
+            interval: str,
+            limit: int = 500,
+            start_time: int = None,
+            end_time: int = None
+    ) -> pd.DataFrame:
+        """
+        Open interest in OHLC format for an exchange pair
+
+        Args:
+            ex: exchange to get OI for (e.g. Binance, Okex, etc.)
+            pair: pair to get OI for (e.g. BTCUSDT, ETHUSDT, etc.)
+            interval: interval to get OI for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            limit: number of data points to return
+            start_time: start time in milliseconds
+            end_time: end time in milliseconds
+
+        Returns:
+            pandas DataFrame with open interest in OHLC format for an exchange pair
+        """
+        data = self._get(
+            endpoint="open_interest_ohlc",
+            params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
+                    "start_time": start_time, "end_time": end_time}
+        )["data"]
+        return self._create_dataframe(data, time_col="t")
+
     def open_interest_aggregated_ohlc(
             self,
             symbol: str,
             interval: str,
-            limit: int = None,
+            limit: int = 500,
             start_time: int = None,
             end_time: int = None
     ) -> pd.DataFrame:
@@ -89,7 +183,7 @@ class CoinglassAPI:
             self,
             symbol: str,
             interval: str,
-            limit: int = None,
+            limit: int = 500,
             start_time: int = None,
             end_time: int = None
     ) -> pd.DataFrame:
@@ -113,11 +207,57 @@ class CoinglassAPI:
         )["data"]
         return self._create_dataframe(data, time_col="createTime")
 
+    def liquidation_pair(
+            self,
+            ex: str,
+            pair: str,
+            interval: str,
+            limit: int = 500,
+            start_time: int = None,
+            end_time: int = None
+    ) -> pd.DataFrame:
+        """
+        Liquidation data for an exchange pair
+
+        Args:
+            ex: exchange to get liquidation data for (e.g. Binance, Okex, etc.)
+            pair: pair to get liquidation data for (e.g. BTCUSDT, ETHUSDT, etc.)
+            interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            limit: number of data points to return
+            start_time: start time in milliseconds
+            end_time: end time in milliseconds
+
+        Returns:
+            pandas DataFrame with liquidation data for an exchange pair
+        """
+        data = self._get(
+            endpoint="funding_ohlc",
+            params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
+                    "start_time": start_time, "end_time": end_time}
+        )["data"]
+        return self._create_dataframe(data, time_col="t")
+
+    def long_short_accounts(
+            self,
+            ex: str,
+            pair: str,
+            interval: str,
+            limit: int = 500,
+            start_time: int = None,
+            end_time: int = None
+    ) -> pd.DataFrame:
+        data = self._get(
+            endpoint="long_short_accounts",
+            params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
+                    "start_time": start_time, "end_time": end_time}
+        )["data"]
+        return self._create_dataframe(data, time_col="createTime")
+
     def long_short_symbol(
             self,
             symbol: str,
             interval: str,
-            limit: int = None,
+            limit: int = 500,
             start_time: int = None,
             end_time: int = None
     ) -> pd.DataFrame:

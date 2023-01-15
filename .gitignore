@@ -69,7 +69,7 @@ docs/_build/
 target/
 
 # IPython Notebook
-.ipynb_checkpoints
+.ipynb_checkpoints/
 
 # pyenv
 .python-version
@@ -183,3 +183,6 @@ fabric.properties
 
 # idea folder, uncomment if you don't need it
 .idea/
+
+# JupyterLab
+*.ipynb
