@@ -16,6 +16,9 @@ pandas = "^1.5.2"
 requests = "^2.28.2"
 
 
+[tool.poetry.group.dev.dependencies]
+jupyterlab = "^3.5.2"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
