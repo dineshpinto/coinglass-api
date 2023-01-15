@@ -1,5 +1,6 @@
 # Coinglass API
-
+[![PyPi version](https://img.shields.io/pypi/v/coinglass-api.svg)](https://pypi.python.org/pypi/coinglass-api/)
+[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100//)
 ## Unofficial Python client for Coinglass API
 
 Wrapper around the [Coinglass API](https://coinglass.com/pricing) to fetch data about the crypto markets.
@@ -7,7 +8,7 @@ All data is output in pandas DataFrames (single or multi index).
 
 **Note**: This is work in progress. The API is not stable yet.
 
-![Example Plot](examples/example_plot.jpg)
+![Example Plot](https://github.com/dineshpinto/coinglass-api/blob/main/examples/example_plot.jpg?raw=true)
 
 ## Installation
 
