@@ -1,6 +1,8 @@
 # Coinglass API
 [![PyPi version](https://img.shields.io/pypi/v/coinglass-api)](https://pypi.python.org/pypi/coinglass-api/)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100//)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110//)
+
 ## Unofficial Python client for Coinglass API
 
 Wrapper around the [Coinglass API](https://coinglass.com/pricing) to fetch data about the crypto markets.
