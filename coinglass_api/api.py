@@ -56,7 +56,7 @@ class CoinglassAPI:
             ex: exchange to get funding rate for (e.g. Binance, dYdX, etc.)
             pair: pair to get funding rate for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
             interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
-            limit: number of data points to return
+            limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
 
@@ -88,7 +88,7 @@ class CoinglassAPI:
             ex: exchange to get funding rate for (e.g. Binance, dYdX, etc.)
             pair: pair to get funding rate for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
             interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
-            limit: number of data points to return
+            limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
 
@@ -118,7 +118,7 @@ class CoinglassAPI:
         Args:
             symbol: symbol to get funding rate for
             interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
-            limit: number of data points to return
+            limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
 
@@ -150,7 +150,7 @@ class CoinglassAPI:
             ex: exchange to get OI for (e.g. Binance, dYdX, etc.)
             pair: pair to get OI for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
             interval: interval to get OI for (e.g. m1, m5, m15, m30, h1, h4, etc.)
-            limit: number of data points to return
+            limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
 
@@ -180,7 +180,7 @@ class CoinglassAPI:
         Args:
             symbol: symbol to get OI for
             interval: interval to get OI for (e.g. m1, m5, m15, m30, h1, h4, etc.)
-            limit: number of data points to return
+            limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
 
@@ -210,7 +210,7 @@ class CoinglassAPI:
         Args:
             symbol: symbol to get liquidation data for
             interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
-            limit: number of data points to return
+            limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
 
@@ -242,7 +242,7 @@ class CoinglassAPI:
             ex: exchange to get liquidation data for (e.g. Binance, dYdX, etc.)
             pair: pair to get liquidation data for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
             interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
-            limit: number of data points to return
+            limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
 
@@ -290,7 +290,7 @@ class CoinglassAPI:
         Args:
             symbol: symbol to get long/short ratio for
             interval: interval to get long/short ratio for (e.g. m1, m5, m15, m30, h1, h4, etc.)
-            limit: number of data points to return
+            limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
 
