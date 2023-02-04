@@ -6,7 +6,7 @@
 ## Unofficial Python client for Coinglass API
 
 Wrapper around the [Coinglass API](https://coinglass.com/pricing) to fetch data about the crypto markets.
-All data is output in pandas DataFrames (single or multi-index).
+All data is output in pandas DataFrames (single or multi-index) and all time series data uses a DataTimeIndex.
 
 **Note**: This is work in progress. Currently only supports the `indicator` API endpoint.
 
@@ -16,6 +16,12 @@ All data is output in pandas DataFrames (single or multi-index).
 
 ```bash
 pip install coinglass-api
+```
+
+### or with poetry 
+
+```bash
+poetry add coinglass-api
 ```
 
 ## Usage
@@ -47,6 +53,44 @@ liq_btc = cg.liquidation_symbol(symbol="BTC", interval="h4")
 # Get long/short ratios for BTC
 lsr_btc = cg.long_short_symbol(symbol="BTC", interval="h4")
 ```
+
+## Examples
+
+```
+>>> cg.funding(ex="dYdX", pair="ETH-USD", interval="h8").head()
+```
+
+| <br/>time           | exchangeName<br/> | symbol<br/> | quoteCurrency<br/> | fundingRate<br/> |
+|:--------------------|:------------------|:------------|:-------------------|:-----------------|
+| 2022-08-22 08:00:00 | dYdX              | ETH         | USD                | -0.001151        |
+| 2022-08-22 16:00:00 | dYdX              | ETH         | USD                | 0.001678         |
+| 2022-08-23 00:00:00 | dYdX              | ETH         | USD                | 0.003743         |
+| 2022-08-23 08:00:00 | dYdX              | ETH         | USD                | 0.003561         |
+| 2022-08-23 16:00:00 | dYdX              | ETH         | USD                | 0.000658         |
+
+```
+>>> cg.funding(ex="dYdX", pair="ETH-USD", interval="h8").info()
+```
+
+```
+<class 'pandas.core.frame.DataFrame'>
+DatetimeIndex: 500 entries, 2022-08-22 08:00:00 to 2023-02-04 16:00:00
+Data columns (total 4 columns):
+ #   Column         Non-Null Count  Dtype  
+---  ------         --------------  -----  
+ 0   exchangeName   500 non-null    object 
+ 1   symbol         500 non-null    object 
+ 2   quoteCurrency  500 non-null    object 
+ 3   fundingRate    500 non-null    float64
+dtypes: float64(1), object(3)
+memory usage: 19.5+ KB
+```
+
+```
+>>> cg.funding(ex="dYdX", pair="ETH-USD", interval="h8").plot(y="fundingRate")
+```
+![funding_rate](examples/funding_rate.jpg)
+
 
 
 ## Disclaimer
