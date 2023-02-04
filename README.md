@@ -89,9 +89,7 @@ memory usage: 19.5+ KB
 ```
 >>> cg.funding(ex="dYdX", pair="ETH-USD", interval="h8").plot(y="fundingRate")
 ```
-![funding_rate](examples/funding_rate.jpg)
-
-
+![funding_rate](https://github.com/dineshpinto/coinglass-api/blob/main/examples/funding_rate.jpg?raw=true)
 
 ## Disclaimer
 
