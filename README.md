@@ -6,7 +6,7 @@
 ## Unofficial Python client for Coinglass API
 
 Wrapper around the [Coinglass API](https://coinglass.com/pricing) to fetch data about the crypto markets.
-All data is output in pandas DataFrames (single or multi-index) and all time series data uses a DataTimeIndex.
+All data is output in pandas DataFrames (single or multi-index) and all time series data uses a DateTimeIndex.
 
 **Note**: This is work in progress. Currently only supports the `indicator` API endpoint.
 
