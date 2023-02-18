@@ -250,7 +250,7 @@ class CoinglassAPI:
             pandas DataFrame with liquidation data for an exchange pair
         """
         response = self._get(
-            endpoint="funding_ohlc",
+            endpoint="liquidation_pair",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
