@@ -26,11 +26,10 @@ poetry add coinglass-api
 
 ## Usage
 
-
 ```python
 from coinglass_api import CoinglassAPI
 
-cg = CoinglassAPI(api_key="abcd1234")
+cg = CoinglassAPI(coinglass_secret="abcd1234")
 
 # Funding rate of ETH on dYdX
 fr_btc_dydx = cg.funding(ex="dYdX", pair="ETH-USD", interval="h8")

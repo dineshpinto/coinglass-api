@@ -5,19 +5,19 @@ import requests
 class CoinglassAPI:
     """ Unofficial Python client for Coinglass API """
 
-    def __init__(self, api_key: str):
+    def __init__(self, coinglass_secret: str):
         """
         Args:
-            api_key: key from Coinglass, get one at https://www.coinglass.com/pricing
+            coinglass_secret: key from Coinglass, get one at https://www.coinglass.com/pricing
         """
-        self.__api_key = api_key
+        self.__coinglass_secret = coinglass_secret
         self._base_url = "https://open-api.coinglass.com/public/v2/indicator/"
         self._session = requests.Session()
 
     def _get(self, endpoint: str, params: dict = None) -> dict:
         headers = {
             "accept": "application/json",
-            "coinglassSecret": self.__api_key
+            "coinglassSecret": self.__coinglass_secret
         }
         url = self._base_url + endpoint
         return self._session.request('GET', url, params=params, headers=headers, timeout=30).json()

@@ -3,7 +3,8 @@ import os
 from coinglass_api import CoinglassAPI
 
 if __name__ == "__main__":
-    api_key = os.getenv("COINGLASS_API_KEY")
-    cg = CoinglassAPI(api_key=api_key)
-    df = cg.funding_average(symbol="BTC", interval="h4")
-    print(df)
+    cg = CoinglassAPI(coinglass_secret=os.getenv("COINGLASS_SECRET"))
+    eth_funding_dydx = cg.funding(ex="dYdX", pair="ETH-USD", interval="h8")
+    print(eth_funding_dydx.info())
+    print(eth_funding_dydx.head())
+    eth_funding_dydx.plot(y="fundingRate")
