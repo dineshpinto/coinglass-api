@@ -9,7 +9,7 @@
 Wrapper around the [Coinglass API](https://coinglass.com/pricing) to fetch data about the crypto markets.
 All data is output in pandas DataFrames (single or multi-index) and all time series data uses a DateTimeIndex.
 
-**Note**: This is work in progress. Currently only supports the `indicator` API endpoint.
+**Note**: Currently only supports the `indicator` API endpoint.
 
 ![Example Plot](https://github.com/dineshpinto/coinglass-api/blob/main/examples/example_plot.jpg?raw=true)
 
@@ -17,12 +17,6 @@ All data is output in pandas DataFrames (single or multi-index) and all time ser
 
 ```bash
 pip install coinglass-api
-```
-
-### or with poetry 
-
-```bash
-poetry add coinglass-api
 ```
 
 ## Usage

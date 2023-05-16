@@ -1,5 +1,5 @@
-from unittest import TestCase
 import os
+from unittest import TestCase
 
 from coinglass_api import CoinglassAPI
 
@@ -66,3 +66,17 @@ class TestAPI(TestCase):
         lsa_eth = cg.long_short_symbol(symbol="ETH", interval="h4")
         self.assertEqual(lsa_eth.shape[0], 500)
         self.assertIn("v", lsa_eth.columns)
+
+    def test_top_long_short_account_ratio(self):
+        lsa_eth = cg.top_long_short_account_ratio(ex="Binance", pair="ETHUSDT", interval="h4")
+        self.assertEqual(lsa_eth.shape[0], 500)
+        self.assertIn("longRatio", lsa_eth.columns)
+        self.assertIn("shortRatio", lsa_eth.columns)
+        self.assertIn("longShortRatio", lsa_eth.columns)
+
+    def test_top_long_short_position_ratio(self):
+        lsa_eth = cg.top_long_short_position_ratio(ex="Binance", pair="ETHUSDT", interval="h4")
+        self.assertEqual(lsa_eth.shape[0], 500)
+        self.assertIn("longRatio", lsa_eth.columns)
+        self.assertIn("shortRatio", lsa_eth.columns)
+        self.assertIn("longShortRatio", lsa_eth.columns)

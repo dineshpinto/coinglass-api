@@ -267,6 +267,20 @@ class CoinglassAPI:
             start_time: int = None,
             end_time: int = None
     ) -> pd.DataFrame:
+        """
+        Long/short ratio for an exchange pair
+
+        Args:
+            ex: exchange to get liquidation data for (e.g. Binance, dYdX, etc.)
+            pair: pair to get liquidation data for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
+            interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            limit: number of data points to return (default: 500)
+            start_time: start time in milliseconds
+            end_time: end time in milliseconds
+
+        Returns:
+            pandas DataFrame with long/short ratio for an exchange pair
+        """
         response = self._get(
             endpoint="long_short_accounts",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
@@ -305,3 +319,67 @@ class CoinglassAPI:
         self._check_for_errors(response)
         data = response["data"]
         return self._create_dataframe(data, time_col="t")
+
+    def top_long_short_account_ratio(
+            self,
+            ex: str,
+            pair: str,
+            interval: str,
+            limit: int = 500,
+            start_time: int = None,
+            end_time: int = None
+    ) -> pd.DataFrame:
+        """
+        Top accounts long/short ratio for an exchange pair
+
+        Args:
+            ex: exchange to get liquidation data for (e.g. Binance, dYdX, etc.)
+            pair: pair to get liquidation data for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
+            interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            limit: number of data points to return (default: 500)
+            start_time: start time in milliseconds
+            end_time: end time in milliseconds
+
+        Returns:
+            pandas DataFrame with top accounts long/short ratio for an exchange pair
+        """
+        response = self._get(
+            endpoint="top_long_short_account_ratio",
+            params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
+                    "start_time": start_time, "end_time": end_time}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime")
+
+    def top_long_short_position_ratio(
+            self,
+            ex: str,
+            pair: str,
+            interval: str,
+            limit: int = 500,
+            start_time: int = None,
+            end_time: int = None
+    ) -> pd.DataFrame:
+        """
+        Top positions long/short ratio for an exchange pair
+
+        Args:
+            ex: exchange to get liquidation data for (e.g. Binance, dYdX, etc.)
+            pair: pair to get liquidation data for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
+            interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            limit: number of data points to return (default: 500)
+            start_time: start time in milliseconds
+            end_time: end time in milliseconds
+
+        Returns:
+            pandas DataFrame with top positions long/short ratio for an exchange pair
+        """
+        response = self._get(
+            endpoint="top_long_short_position_ratio",
+            params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
+                    "start_time": start_time, "end_time": end_time}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime")
