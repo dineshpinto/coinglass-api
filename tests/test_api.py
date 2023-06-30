@@ -80,3 +80,55 @@ class TestAPI(TestCase):
         self.assertIn("longRatio", lsa_eth.columns)
         self.assertIn("shortRatio", lsa_eth.columns)
         self.assertIn("longShortRatio", lsa_eth.columns)
+
+    def test_bitcoin_bubble_index(self):
+        bbi = cg.bitcoin_bubble_index()
+        self.assertIn("index", bbi.columns)
+
+    def test_ahr999(self):
+        ahr999 = cg.ahr999()
+        self.assertIn("ahr999", ahr999.columns)
+
+    def test_tow_year_ma_multiplier(self):
+        tymm = cg.tow_year_ma_multiplier()
+        self.assertIn("mA730Mu5", tymm.columns)
+        self.assertIn("mA730", tymm.columns)
+
+    def test_tow_hundred_week_moving_avg_heatmap(self):
+        thwmah = cg.tow_hundred_week_moving_avg_heatmap()
+        self.assertIn("mA1440", thwmah.columns)
+
+    def test_puell_multiple(self):
+        pm = cg.puell_multiple()
+        self.assertIn("puellMultiple", pm.columns)
+
+    def test_stock_flow(self):
+        sf = cg.stock_flow()
+        self.assertIn("stockFlow365dAverage", sf.columns)
+        self.assertIn("nextHalving", sf.columns)
+
+    def test_pi(self):
+        pi = cg.pi()
+        self.assertIn("ma350Mu2", pi.columns)
+        self.assertIn("ma110", pi.columns)
+
+    def test_golden_ratio_multiplier(self):
+        grm = cg.golden_ratio_multiplier()
+        self.assertIn("3LowBullHigh", grm.columns)
+        self.assertIn("x8", grm.columns)
+        self.assertIn("x21", grm.columns)
+
+    def test_bitcoin_profitable_days(self):
+        bpd = cg.bitcoin_profitable_days()
+        self.assertIn("side", bpd.columns)
+
+    def test_log_log_regression(self):
+        llr = cg.log_log_regression()
+        self.assertIn("Fib9098Dev", llr.columns)
+        self.assertIn("Oscillator", llr.columns)
+        self.assertIn("HighDev", llr.columns)
+
+    def test_grayscale_market_history(self):
+        gmh = cg.grayscale_market_history()
+        self.assertIn("markerPriceList", gmh.columns)
+        self.assertIn("premiumRateList", gmh.columns)

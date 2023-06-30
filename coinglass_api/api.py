@@ -11,7 +11,7 @@ class CoinglassAPI:
             coinglass_secret: key from Coinglass, get one at https://www.coinglass.com/pricing
         """
         self.__coinglass_secret = coinglass_secret
-        self._base_url = "https://open-api.coinglass.com/public/v2/indicator/"
+        self._base_url = "https://open-api.coinglass.com/public/v2/"
         self._session = requests.Session()
 
     def _get(self, endpoint: str, params: dict = None) -> dict:
@@ -23,15 +23,27 @@ class CoinglassAPI:
         return self._session.request('GET', url, params=params, headers=headers, timeout=30).json()
 
     @staticmethod
-    def _create_dataframe(data: list[dict], time_col: str) -> pd.DataFrame:
+    def _create_dataframe(
+            data: list[dict],
+            time_col: str,
+            unit: str | None = "ms",
+            cast_objects_to_numeric: bool = False
+    ) -> pd.DataFrame:
         """ Create pandas DataFrame from list of dicts """
         df = pd.DataFrame(data)
-        df["time"] = pd.to_datetime(df[time_col], unit="ms")
+        if time_col == "time":
+            df.rename(columns={"time": "t"}, inplace=True)
+            time_col = "t"
+        df["time"] = pd.to_datetime(df[time_col], unit=unit)
         df.drop(columns=[time_col], inplace=True)
         df.set_index("time", inplace=True, drop=True)
 
         if "t" in df.columns:
             df.drop(columns=["t"], inplace=True)
+
+        if cast_objects_to_numeric:
+            cols = df.columns[df.dtypes.eq('object')]
+            df[cols] = df[cols].apply(pd.to_numeric)
         return df
 
     @staticmethod
@@ -64,7 +76,7 @@ class CoinglassAPI:
             pandas DataFrame with funding rate
         """
         response = self._get(
-            endpoint="funding",
+            endpoint="indicator/funding",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -96,7 +108,7 @@ class CoinglassAPI:
             pandas DataFrame with funding rate in OHLC format for an exchange pair
         """
         response = self._get(
-            endpoint="funding_ohlc",
+            endpoint="indicator/funding_ohlc",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -126,7 +138,7 @@ class CoinglassAPI:
             pandas DataFrame with funding rate
         """
         response = self._get(
-            endpoint="funding_avg",
+            endpoint="indicator/funding_avg",
             params={"symbol": symbol, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -158,7 +170,7 @@ class CoinglassAPI:
             pandas DataFrame with open interest in OHLC format for an exchange pair
         """
         response = self._get(
-            endpoint="open_interest_ohlc",
+            endpoint="indicator/open_interest_ohlc",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -188,7 +200,7 @@ class CoinglassAPI:
             pandas DataFrame with aggregated open interest in OHLC format
         """
         response = self._get(
-            endpoint="open_interest_aggregated_ohlc",
+            endpoint="indicator/open_interest_aggregated_ohlc",
             params={"symbol": symbol, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -218,7 +230,7 @@ class CoinglassAPI:
             pandas DataFrame with liquidation data
         """
         response = self._get(
-            endpoint="liquidation_symbol",
+            endpoint="indicator/liquidation_symbol",
             params={"symbol": symbol, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -250,7 +262,7 @@ class CoinglassAPI:
             pandas DataFrame with liquidation data for an exchange pair
         """
         response = self._get(
-            endpoint="liquidation_pair",
+            endpoint="indicator/liquidation_pair",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -282,7 +294,7 @@ class CoinglassAPI:
             pandas DataFrame with long/short ratio for an exchange pair
         """
         response = self._get(
-            endpoint="long_short_accounts",
+            endpoint="indicator/long_short_accounts",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -312,7 +324,7 @@ class CoinglassAPI:
             pandas DataFrame with long/short ratio
         """
         response = self._get(
-            endpoint="long_short_symbol",
+            endpoint="indicator/long_short_symbol",
             params={"symbol": symbol, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -344,7 +356,7 @@ class CoinglassAPI:
             pandas DataFrame with top accounts long/short ratio for an exchange pair
         """
         response = self._get(
-            endpoint="top_long_short_account_ratio",
+            endpoint="indicator/top_long_short_account_ratio",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
@@ -376,10 +388,98 @@ class CoinglassAPI:
             pandas DataFrame with top positions long/short ratio for an exchange pair
         """
         response = self._get(
-            endpoint="top_long_short_position_ratio",
+            endpoint="indicator/top_long_short_position_ratio",
             params={"ex": ex, "pair": pair, "interval": interval, "limit": limit,
                     "start_time": start_time, "end_time": end_time}
         )
         self._check_for_errors(response)
         data = response["data"]
         return self._create_dataframe(data, time_col="createTime")
+
+    def bitcoin_bubble_index(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/bitcoin_bubble_index",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="time", unit=None)
+
+    def ahr999(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/ahr999",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="date", unit=None)
+
+    def tow_year_ma_multiplier(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/tow_year_MA_multiplier",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime")
+
+    def tow_hundred_week_moving_avg_heatmap(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/tow_hundred_week_moving_avg_heatmap",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime")
+
+    def puell_multiple(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/puell_multiple",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime")
+
+    def stock_flow(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/stock_flow",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime", unit=None)
+
+    def pi(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/pi",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime", cast_objects_to_numeric=True)
+
+    def golden_ratio_multiplier(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/golden_ratio_multiplier",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime", cast_objects_to_numeric=True)
+
+    def bitcoin_profitable_days(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/bitcoin_profitable_days",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime")
+
+    def log_log_regression(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/log_log_regression",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="createTime")
+
+    def grayscale_market_history(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="index/grayscale_market_history",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data, time_col="dateList")
