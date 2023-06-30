@@ -17,30 +17,30 @@ jobs:
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
-        python-version: ["3.10", "3.11"]
+        python-version: [ "3.10", "3.11" ]
       fail-fast: true
       max-parallel: 1
     env:
       PYTHON: ${{ matrix.python-version }}
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Set up poetry
-      uses: Gr1N/setup-poetry@v8
-    - name: Install dependencies
-      run: poetry install --with test
-    - name: Test with unittests
-      env:
-        COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
-      run: |
-        poetry run coverage run -m unittest -v
-        poetry run coverage xml
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
-      with:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up poetry
+        uses: Gr1N/setup-poetry@v8
+      - name: Install dependencies
+        run: poetry install --with test
+      - name: Test with unittests
+        env:
+          COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
+        run: |
+          poetry run coverage run -m unittest -v
+          poetry run coverage xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
           env_vars: PYTHON
