@@ -35,7 +35,7 @@ jobs:
       env:
         COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
       run: |
-        poetry run coverage run -m unittest
+        poetry run coverage run -m unittest -v
         poetry run coverage xml
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
