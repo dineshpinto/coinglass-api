@@ -11,12 +11,12 @@ class TestAPI(TestCase):
     def tearDown(self) -> None:
         self.cg._session.close()
 
-    def test_funding(self):
+    def test_funding(self) -> None:
         fr_btc_dydx = self.cg.funding(ex="dYdX", pair="ETH-USD", interval="h8")
         self.assertEqual(fr_btc_dydx.shape[0], 500)
         self.assertTrue("fundingRate" in fr_btc_dydx.columns)
 
-    def test_funding_ohlc(self):
+    def test_funding_ohlc(self) -> None:
         fr_ohlc_eth_binance = self.cg.funding_ohlc(ex="Binance", pair="ETHUSDT", interval="h4")
         self.assertEqual(fr_ohlc_eth_binance.shape[0], 500)
         self.assertTrue("o" in fr_ohlc_eth_binance.columns)
@@ -24,12 +24,12 @@ class TestAPI(TestCase):
         self.assertTrue("l" in fr_ohlc_eth_binance.columns)
         self.assertTrue("c" in fr_ohlc_eth_binance.columns)
 
-    def test_funding_average(self):
+    def test_funding_average(self) -> None:
         fr_avg_eth = self.cg.funding_average(symbol="ETH", interval="h4")
         self.assertEqual(fr_avg_eth.shape[0], 500)
         self.assertIn("fundingRate", fr_avg_eth.columns)
 
-    def test_open_interest_ohlc(self):
+    def test_open_interest_ohlc(self) -> None:
         oi_ohlc_eth_binance = self.cg.open_interest_ohlc(ex="Binance", pair="ETHUSDT", interval="h4")
         self.assertEqual(oi_ohlc_eth_binance.shape[0], 500)
         self.assertIn("o", oi_ohlc_eth_binance.columns)
@@ -37,7 +37,7 @@ class TestAPI(TestCase):
         self.assertIn("l", oi_ohlc_eth_binance.columns)
         self.assertIn("c", oi_ohlc_eth_binance.columns)
 
-    def test_open_interest_aggregated_ohlc(self):
+    def test_open_interest_aggregated_ohlc(self) -> None:
         oi_ohlc_eth_binance = self.cg.open_interest_aggregated_ohlc(symbol="ETH", interval="h4")
         self.assertEqual(oi_ohlc_eth_binance.shape[0], 500)
         self.assertIn("o", oi_ohlc_eth_binance.columns)
@@ -45,94 +45,94 @@ class TestAPI(TestCase):
         self.assertIn("l", oi_ohlc_eth_binance.columns)
         self.assertIn("c", oi_ohlc_eth_binance.columns)
 
-    def test_liquidation_symbol(self):
+    def test_liquidation_symbol(self) -> None:
         liq_eth = self.cg.liquidation_symbol(symbol="ETH", interval="h4")
         self.assertEqual(liq_eth.shape[0], 500)
         self.assertIn("volUsd", liq_eth.columns)
         self.assertIn("buyVolUsd", liq_eth.columns)
         self.assertIn("sellVolUsd", liq_eth.columns)
 
-    def test_liquidation_pair(self):
+    def test_liquidation_pair(self) -> None:
         liq_eth = self.cg.liquidation_pair(ex="Binance", pair="ETHUSDT", interval="h4")
         self.assertEqual(liq_eth.shape[0], 500)
         self.assertIn("volUsd", liq_eth.columns)
         self.assertIn("buyVolUsd", liq_eth.columns)
         self.assertIn("sellVolUsd", liq_eth.columns)
 
-    def test_long_short_accounts(self):
+    def test_long_short_accounts(self) -> None:
         lsa_eth = self.cg.long_short_accounts(ex="Binance", pair="ETHUSDT", interval="h4")
         self.assertEqual(lsa_eth.shape[0], 500)
         self.assertIn("longRatio", lsa_eth.columns)
         self.assertIn("shortRatio", lsa_eth.columns)
         self.assertIn("longShortRatio", lsa_eth.columns)
 
-    def test_long_short_symbol(self):
+    def test_long_short_symbol(self) -> None:
         lsa_eth = self.cg.long_short_symbol(symbol="ETH", interval="h4")
         self.assertEqual(lsa_eth.shape[0], 500)
         self.assertIn("v", lsa_eth.columns)
 
-    def test_top_long_short_account_ratio(self):
+    def test_top_long_short_account_ratio(self) -> None:
         lsa_eth = self.cg.top_long_short_account_ratio(ex="Binance", pair="ETHUSDT", interval="h4")
         self.assertEqual(lsa_eth.shape[0], 500)
         self.assertIn("longRatio", lsa_eth.columns)
         self.assertIn("shortRatio", lsa_eth.columns)
         self.assertIn("longShortRatio", lsa_eth.columns)
 
-    def test_top_long_short_position_ratio(self):
+    def test_top_long_short_position_ratio(self) -> None:
         lsa_eth = self.cg.top_long_short_position_ratio(ex="Binance", pair="ETHUSDT", interval="h4")
         self.assertEqual(lsa_eth.shape[0], 500)
         self.assertIn("longRatio", lsa_eth.columns)
         self.assertIn("shortRatio", lsa_eth.columns)
         self.assertIn("longShortRatio", lsa_eth.columns)
 
-    def test_bitcoin_bubble_index(self):
+    def test_bitcoin_bubble_index(self) -> None:
         bbi = self.cg.bitcoin_bubble_index()
         self.assertIn("index", bbi.columns)
 
-    def test_ahr999(self):
+    def test_ahr999(self) -> None:
         ahr999 = self.cg.ahr999()
         self.assertIn("ahr999", ahr999.columns)
 
-    def test_tow_year_ma_multiplier(self):
+    def test_tow_year_ma_multiplier(self) -> None:
         tymm = self.cg.tow_year_ma_multiplier()
         self.assertIn("mA730Mu5", tymm.columns)
         self.assertIn("mA730", tymm.columns)
 
-    def test_tow_hundred_week_moving_avg_heatmap(self):
+    def test_tow_hundred_week_moving_avg_heatmap(self) -> None:
         thwmah = self.cg.tow_hundred_week_moving_avg_heatmap()
         self.assertIn("mA1440", thwmah.columns)
 
-    def test_puell_multiple(self):
+    def test_puell_multiple(self) -> None:
         pm = self.cg.puell_multiple()
         self.assertIn("puellMultiple", pm.columns)
 
-    def test_stock_flow(self):
+    def test_stock_flow(self) -> None:
         sf = self.cg.stock_flow()
         self.assertIn("stockFlow365dAverage", sf.columns)
         self.assertIn("nextHalving", sf.columns)
 
-    def test_pi(self):
+    def test_pi(self) -> None:
         pi = self.cg.pi()
         self.assertIn("ma350Mu2", pi.columns)
         self.assertIn("ma110", pi.columns)
 
-    def test_golden_ratio_multiplier(self):
+    def test_golden_ratio_multiplier(self) -> None:
         grm = self.cg.golden_ratio_multiplier()
         self.assertIn("3LowBullHigh", grm.columns)
         self.assertIn("x8", grm.columns)
         self.assertIn("x21", grm.columns)
 
-    def test_bitcoin_profitable_days(self):
+    def test_bitcoin_profitable_days(self) -> None:
         bpd = self.cg.bitcoin_profitable_days()
         self.assertIn("side", bpd.columns)
 
-    def test_log_log_regression(self):
+    def test_log_log_regression(self) -> None:
         llr = self.cg.log_log_regression()
         self.assertIn("Fib9098Dev", llr.columns)
         self.assertIn("Oscillator", llr.columns)
         self.assertIn("HighDev", llr.columns)
 
-    def test_grayscale_market_history(self):
+    def test_grayscale_market_history(self) -> None:
         gmh = self.cg.grayscale_market_history()
         self.assertIn("markerPriceList", gmh.columns)
         self.assertIn("premiumRateList", gmh.columns)

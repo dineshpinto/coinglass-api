@@ -20,7 +20,13 @@ class CoinglassAPI:
             "coinglassSecret": self.__coinglass_secret
         }
         url = self._base_url + endpoint
-        return self._session.request('GET', url, params=params, headers=headers, timeout=30).json()
+        return self._session.request(
+            method='GET',
+            url=url,
+            params=params,
+            headers=headers,
+            timeout=30
+        ).json()
 
     @staticmethod
     def _create_dataframe(
@@ -29,21 +35,37 @@ class CoinglassAPI:
             unit: str | None = "ms",
             cast_objects_to_numeric: bool = False
     ) -> pd.DataFrame:
-        """ Create pandas DataFrame from list of dicts """
+        """
+        Create pandas DataFrame from a list of dicts
+
+        Args:
+            data: list of dicts
+            time_col: name of time column in dict
+            unit: unit of time column, specify None to use auto-resolver (default: ms)
+            cast_objects_to_numeric: cast all object columns to numeric (default: False)
+
+        Returns:
+            pandas DataFrame
+        """
         df = pd.DataFrame(data)
+
         if time_col == "time":
+            # Handle edge case of time column being named "time"
             df.rename(columns={"time": "t"}, inplace=True)
             time_col = "t"
+
         df["time"] = pd.to_datetime(df[time_col], unit=unit)
         df.drop(columns=[time_col], inplace=True)
         df.set_index("time", inplace=True, drop=True)
 
         if "t" in df.columns:
+            # Drop additional "t" column if it exists
             df.drop(columns=["t"], inplace=True)
 
         if cast_objects_to_numeric:
             cols = df.columns[df.dtypes.eq('object')]
             df[cols] = df[cols].apply(pd.to_numeric)
+
         return df
 
     @staticmethod
