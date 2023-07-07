@@ -31,7 +31,7 @@ class CoinglassAPI:
     @staticmethod
     def _create_dataframe(
             data: list[dict],
-            time_col: str,
+            time_col: str | None = None,
             unit: str | None = "ms",
             cast_objects_to_numeric: bool = False
     ) -> pd.DataFrame:
@@ -49,18 +49,19 @@ class CoinglassAPI:
         """
         df = pd.DataFrame(data)
 
-        if time_col == "time":
-            # Handle edge case of time column being named "time"
-            df.rename(columns={"time": "t"}, inplace=True)
-            time_col = "t"
+        if time_col:
+            if time_col == "time":
+                # Handle edge case of time column being named "time"
+                df.rename(columns={"time": "t"}, inplace=True)
+                time_col = "t"
 
-        df["time"] = pd.to_datetime(df[time_col], unit=unit)
-        df.drop(columns=[time_col], inplace=True)
-        df.set_index("time", inplace=True, drop=True)
+            df["time"] = pd.to_datetime(df[time_col], unit=unit)
+            df.drop(columns=[time_col], inplace=True)
+            df.set_index("time", inplace=True, drop=True)
 
-        if "t" in df.columns:
-            # Drop additional "t" column if it exists
-            df.drop(columns=["t"], inplace=True)
+            if "t" in df.columns:
+                # Drop additional "t" column if it exists
+                df.drop(columns=["t"], inplace=True)
 
         if cast_objects_to_numeric:
             cols = df.columns[df.dtypes.eq('object')]
@@ -69,10 +70,302 @@ class CoinglassAPI:
         return df
 
     @staticmethod
+    def _create_multiindex_dataframe(data: list[dict], list_key: str) -> pd.DataFrame:
+        """
+        Create MultiIndex pandas DataFrame from a list of nested dicts
+
+        Args:
+            data: list of nested dicts
+
+        Returns:
+            dict of pandas DataFrame
+        """
+        flattened_data = {}
+
+        # Flatten nested dicts
+        for symbol_data in data:
+            flattened_dict = {}
+            for outer_key, outer_value in symbol_data.items():
+                if isinstance(outer_value, list):
+                    for exchange in outer_value:
+                        exchange_name = exchange["exchangeName"]
+                        for inner_key, value in exchange.items():
+                            flattened_dict[(outer_key, exchange_name, inner_key)] = value
+                else:
+                    flattened_dict[outer_key] = outer_value
+
+            # Remove non-tuple keys
+            remove_keys = []
+            for key in list(flattened_dict.keys()):
+                if not isinstance(key, tuple):
+                    remove_keys.append(key)
+
+            for k in remove_keys:
+                flattened_dict.pop(k, None)
+
+            df = pd.DataFrame.from_dict(flattened_dict, orient="index")
+            df.index = pd.MultiIndex.from_tuples(df.index)
+
+            flattened_data[symbol_data[list_key]] = df
+
+        return pd.concat(flattened_data, axis=1)
+
+    @staticmethod
+    def _flatten_dictionary(data: dict) -> dict:
+        flattened_dict = {}
+
+        for k, v in data.items():
+            if isinstance(v, dict):
+                for outer_key, outer_value in v.items():
+                    if isinstance(outer_value, list):
+                        flattened_dict[(k, outer_key)] = outer_value
+                    else:
+                        flattened_dict[outer_key] = outer_value
+            else:
+                flattened_dict[(k, 0)] = v
+
+        return flattened_dict
+
+    @staticmethod
     def _check_for_errors(response: dict) -> None:
         """ Check for errors in response """
         if not response["success"]:
             raise Exception(f"Code {response['code']}: {response['msg']}")
+
+    def perpetual_market(self, symbol: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="perpetual_market",
+            params={"symbol": symbol}
+        )
+        self._check_for_errors(response)
+        data = response["data"][symbol]
+        return self._create_dataframe(data)
+
+    def futures_market(self, symbol: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="futures_market",
+            params={"symbol": symbol}
+        )
+        self._check_for_errors(response)
+        data = response["data"][symbol]
+        return self._create_dataframe(data)
+
+    def funding_rate(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="funding",
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_multiindex_dataframe(data, list_key="symbol")
+
+    def funding_usd_history(self, symbol: str, time_type: str) -> list[dict]:
+        response = self._get(
+            endpoint="funding_usd_history",
+            params={"symbol": symbol, "time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return data
+
+    def funding_coin_history(self, symbol: str, time_type: str) -> list[dict]:
+        response = self._get(
+            endpoint="funding_coin_history",
+            params={"symbol": symbol, "time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return data
+
+    def open_interest(self, symbol: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="open_interest",
+            params={"symbol": symbol}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data)
+
+    def open_interest_history(self, symbol: str, time_type: str, currency: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="open_interest_history",
+            params={"symbol": symbol, "time_type": time_type, "currency": currency}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+
+        flattened_dict = {}
+
+        for k, v in data.items():
+            if isinstance(v, dict):
+                for outer_key, outer_value in v.items():
+                    if isinstance(outer_value, list):
+                        flattened_dict[(k, outer_key)] = outer_value
+                    else:
+                        flattened_dict[outer_key] = outer_value
+            else:
+                flattened_dict[(k, 0)] = v
+
+        df = pd.DataFrame(flattened_dict)
+        df["time"] = pd.to_datetime(df["dateList"][0], unit="ms")
+        df.drop(columns=["dateList"], inplace=True)
+        df.set_index("time", inplace=True, drop=True)
+        return df
+
+    def option(self, symbol: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="option",
+            params={"symbol": symbol}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data)
+
+    def option_history(self, symbol: str, currency: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="option_history",
+            params={"symbol": symbol, "currency": currency}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        df = pd.DataFrame(self._flatten_dictionary(data[0]))
+        df["time"] = pd.to_datetime(df["dateList"][0], unit="ms")
+        df.drop(columns=["dateList"], inplace=True, level=0)
+        df.set_index("time", inplace=True, drop=True)
+        return df
+
+    def option_vol_history(self, symbol: str, currency: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="option/vol/history",
+            params={"symbol": symbol, "currency": currency}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        df = pd.DataFrame(self._flatten_dictionary(data[0]))
+        df["time"] = pd.to_datetime(df["dateList"][0], unit="ms")
+        df.drop(columns=["dateList"], inplace=True, level=0)
+        df.set_index("time", inplace=True, drop=True)
+        return df
+
+    def top_liquidations(self, time_type: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="liquidation_top",
+            params={"time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data)
+
+    def liquidation_info(self, symbol: str, time_type: str) -> dict:
+        response = self._get(
+            endpoint="liquidation_info",
+            params={"symbol": symbol, "time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return data
+
+    def exchange_liquidations(self, symbol: str, time_type: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="liquidation_ex",
+            params={"symbol": symbol, "time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data)
+
+    def liquidations_history(self, symbol: str, time_type: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="liquidation_history",
+            params={"symbol": symbol, "time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_multiindex_dataframe(data, list_key="createTime")
+
+    def exchange_long_short_ratio(self, symbol: str, time_type: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="long_short",
+            params={"symbol": symbol, "time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_multiindex_dataframe(data, list_key="symbol")
+
+    def long_short_ratio_history(self, symbol: str, time_type: str) -> list[dict]:
+        response = self._get(
+            endpoint="long_short_history",
+            params={"symbol": symbol, "time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return data
+
+    def futures_coins_markets(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="futures_coins_markets",
+            params={}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data)
+
+    def futures_coins_price_change(self) -> pd.DataFrame:
+        response = self._get(
+            endpoint="futures_coins_price_change",
+            params={}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return self._create_dataframe(data)
+
+    def futures_basis_chart(self, symbol: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="futures_basis_chart",
+            params={"symbol": symbol}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+
+        flattened_data = {}
+
+        # Flatten nested dicts
+        for symbol_data in data:
+            flattened_dict = {}
+            for outer_key, outer_value in symbol_data.items():
+                if isinstance(outer_value, dict):
+                    for inner_key, value in outer_value.items():
+                        flattened_dict[(outer_key, inner_key)] = value
+                else:
+                    flattened_dict[outer_key] = outer_value
+
+            # Remove non-tuple keys
+            remove_keys = []
+            for key in list(flattened_dict.keys()):
+                if not isinstance(key, tuple):
+                    remove_keys.append(key)
+
+            for k in remove_keys:
+                flattened_dict.pop(k, None)
+
+            df = pd.DataFrame.from_dict(flattened_dict, orient="index")
+            df.index = pd.MultiIndex.from_tuples(df.index)
+
+            flattened_data[symbol_data["exName"]] = df
+
+        return pd.concat(flattened_data, axis=1)
+
+    def futures_vol(self, symbol: str, time_type: str) -> pd.DataFrame:
+        response = self._get(
+            endpoint="futures_vol",
+            params={"symbol": symbol, "time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        df = pd.DataFrame(self._flatten_dictionary(data))
+        df["time"] = pd.to_datetime(df["dateList"][0], unit="ms")
+        df.drop(columns=["dateList"], inplace=True, level=0)
+        df.set_index("time", inplace=True, drop=True)
+        return data
 
     def funding(
             self,
