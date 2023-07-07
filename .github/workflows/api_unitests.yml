@@ -32,11 +32,28 @@ jobs:
         uses: Gr1N/setup-poetry@v8
       - name: Install dependencies
         run: poetry install --with test
-      - name: Test with unittests
+      - name: Test API
         env:
           COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
         run: |
-          poetry run coverage run -m unittest -v
+          poetry run coverage run -m unittest tests.test_api -v
+          poetry run coverage xml
+      - name: Sleep for 20 seconds
+        run: sleep 20s
+        shell: bash
+      - name: Test Indicator Endpoint
+        env:
+          COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
+        run: |
+          poetry run coverage run -a -m unittest tests.test_indicator_endpoint -v
+      - name: Sleep for 20 seconds
+        run: sleep 20s
+        shell: bash
+      - name: Test Index Endpoint
+        env:
+          COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
+        run: |
+          poetry run coverage run -a -m unittest tests.test_index_endpoint -v
           poetry run coverage xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
