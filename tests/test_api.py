@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 
-from coinglass_api import CoinglassAPI
+from coinglass_api import CoinglassAPI, RequiresUpgradedPlanException
 
 
 class TestAPI(TestCase):
@@ -11,128 +11,108 @@ class TestAPI(TestCase):
     def tearDown(self) -> None:
         self.cg._session.close()
 
-    def test_funding(self) -> None:
-        fr_btc_dydx = self.cg.funding(ex="dYdX", pair="ETH-USD", interval="h8")
-        self.assertEqual(fr_btc_dydx.shape[0], 500)
-        self.assertTrue("fundingRate" in fr_btc_dydx.columns)
+    def test_perpetual_market(self) -> None:
+        btc_perp = self.cg.perpetual_market(symbol="BTC")
+        self.assertIn("openInterest", btc_perp.columns)
+        self.assertIn("fundingRate", btc_perp.columns)
+        self.assertIn("totalVolUsd", btc_perp.columns)
 
-    def test_funding_ohlc(self) -> None:
-        fr_ohlc_eth_binance = self.cg.funding_ohlc(ex="Binance", pair="ETHUSDT", interval="h4")
-        self.assertEqual(fr_ohlc_eth_binance.shape[0], 500)
-        self.assertTrue("o" in fr_ohlc_eth_binance.columns)
-        self.assertTrue("h" in fr_ohlc_eth_binance.columns)
-        self.assertTrue("l" in fr_ohlc_eth_binance.columns)
-        self.assertTrue("c" in fr_ohlc_eth_binance.columns)
+    def test_futures_markets(self) -> None:
+        btc_futs = self.cg.futures_market(symbol="BTC")
+        self.assertIn("longRate", btc_futs.columns)
+        self.assertIn("shortRate", btc_futs.columns)
+        self.assertIn("openInterestAmount", btc_futs.columns)
 
-    def test_funding_average(self) -> None:
-        fr_avg_eth = self.cg.funding_average(symbol="ETH", interval="h4")
-        self.assertEqual(fr_avg_eth.shape[0], 500)
-        self.assertIn("fundingRate", fr_avg_eth.columns)
+    def test_funding_usd_history(self) -> None:
+        with self.assertRaises(RequiresUpgradedPlanException):
+            self.cg.funding_usd_history(symbol="BTC", time_type="m1")
 
-    def test_open_interest_ohlc(self) -> None:
-        oi_ohlc_eth_binance = self.cg.open_interest_ohlc(ex="Binance", pair="ETHUSDT", interval="h4")
-        self.assertEqual(oi_ohlc_eth_binance.shape[0], 500)
-        self.assertIn("o", oi_ohlc_eth_binance.columns)
-        self.assertIn("h", oi_ohlc_eth_binance.columns)
-        self.assertIn("l", oi_ohlc_eth_binance.columns)
-        self.assertIn("c", oi_ohlc_eth_binance.columns)
+    def test_funding_coin_history(self) -> None:
+        with self.assertRaises(RequiresUpgradedPlanException):
+            self.cg.funding_coin_history(symbol="BTC", time_type="m1")
 
-    def test_open_interest_aggregated_ohlc(self) -> None:
-        oi_ohlc_eth_binance = self.cg.open_interest_aggregated_ohlc(symbol="ETH", interval="h4")
-        self.assertEqual(oi_ohlc_eth_binance.shape[0], 500)
-        self.assertIn("o", oi_ohlc_eth_binance.columns)
-        self.assertIn("h", oi_ohlc_eth_binance.columns)
-        self.assertIn("l", oi_ohlc_eth_binance.columns)
-        self.assertIn("c", oi_ohlc_eth_binance.columns)
+    def test_open_interest(self) -> None:
+        btc_oi = self.cg.open_interest(symbol="BTC")
+        self.assertIn("openInterest", btc_oi.columns)
+        self.assertIn("openInterestAmountByStableCoinMargin", btc_oi.columns)
+        self.assertIn("h4OIChangePercent", btc_oi.columns)
 
-    def test_liquidation_symbol(self) -> None:
-        liq_eth = self.cg.liquidation_symbol(symbol="ETH", interval="h4")
-        self.assertEqual(liq_eth.shape[0], 500)
-        self.assertIn("volUsd", liq_eth.columns)
-        self.assertIn("buyVolUsd", liq_eth.columns)
-        self.assertIn("sellVolUsd", liq_eth.columns)
+    def test_open_interest_history(self) -> None:
+        with self.assertRaises(RequiresUpgradedPlanException):
+            self.cg.open_interest_history(symbol="BTC", time_type="m1", currency="USD")
 
-    def test_liquidation_pair(self) -> None:
-        liq_eth = self.cg.liquidation_pair(ex="Binance", pair="ETHUSDT", interval="h4")
-        self.assertEqual(liq_eth.shape[0], 500)
-        self.assertIn("volUsd", liq_eth.columns)
-        self.assertIn("buyVolUsd", liq_eth.columns)
-        self.assertIn("sellVolUsd", liq_eth.columns)
+    def test_option(self):
+        btc_option = self.cg.option(symbol="BTC")
+        self.assertIn("openInterest", btc_option.columns)
+        self.assertIn("rate", btc_option.columns)
+        self.assertIn("h24Change", btc_option.columns)
 
-    def test_long_short_accounts(self) -> None:
-        lsa_eth = self.cg.long_short_accounts(ex="Binance", pair="ETHUSDT", interval="h4")
-        self.assertEqual(lsa_eth.shape[0], 500)
-        self.assertIn("longRatio", lsa_eth.columns)
-        self.assertIn("shortRatio", lsa_eth.columns)
-        self.assertIn("longShortRatio", lsa_eth.columns)
+    def test_option_history(self):
+        btc_option = self.cg.option_history(symbol="BTC", currency="USD")
+        self.assertIn(('dataMap', 'Deribit'), btc_option.columns)
+        self.assertIn(('dataMap', 'CME'), btc_option.columns)
+        self.assertIn(('dataMap', 'OKX'), btc_option.columns)
 
-    def test_long_short_symbol(self) -> None:
-        lsa_eth = self.cg.long_short_symbol(symbol="ETH", interval="h4")
-        self.assertEqual(lsa_eth.shape[0], 500)
-        self.assertIn("v", lsa_eth.columns)
+    def test_option_vol_history(self) -> None:
+        btc_option = self.cg.option_vol_history(symbol="BTC", currency="USD")
+        self.assertIn(('dataMap', 'Deribit'), btc_option.columns)
+        self.assertIn(('dataMap', 'CME'), btc_option.columns)
+        self.assertIn(('dataMap', 'OKX'), btc_option.columns)
 
-    def test_top_long_short_account_ratio(self) -> None:
-        lsa_eth = self.cg.top_long_short_account_ratio(ex="Binance", pair="ETHUSDT", interval="h4")
-        self.assertEqual(lsa_eth.shape[0], 500)
-        self.assertIn("longRatio", lsa_eth.columns)
-        self.assertIn("shortRatio", lsa_eth.columns)
-        self.assertIn("longShortRatio", lsa_eth.columns)
+    def test_top_liquidations(self) -> None:
+        btc_liquidations = self.cg.top_liquidations(time_type="h1")
+        self.assertIn("number", btc_liquidations.columns)
+        self.assertIn("amount", btc_liquidations.columns)
+        self.assertIn("longVolUsd", btc_liquidations.columns)
+        self.assertIn("shortVolUsd", btc_liquidations.columns)
 
-    def test_top_long_short_position_ratio(self) -> None:
-        lsa_eth = self.cg.top_long_short_position_ratio(ex="Binance", pair="ETHUSDT", interval="h4")
-        self.assertEqual(lsa_eth.shape[0], 500)
-        self.assertIn("longRatio", lsa_eth.columns)
-        self.assertIn("shortRatio", lsa_eth.columns)
-        self.assertIn("longShortRatio", lsa_eth.columns)
+    def test_liquidation_info(self) -> None:
+        btc_liquidations_info = self.cg.liquidation_info(symbol="BTC", time_type="h1")
+        self.assertIn("h1TotalVolUsd", btc_liquidations_info)
+        self.assertIn("h1Amount", btc_liquidations_info)
+        self.assertIn("h24TotalVolUsd", btc_liquidations_info)
+        self.assertIn("h24TotalVolUsd", btc_liquidations_info)
 
-    def test_bitcoin_bubble_index(self) -> None:
-        bbi = self.cg.bitcoin_bubble_index()
-        self.assertIn("index", bbi.columns)
+    def test_exchange_liquidations(self) -> None:
+        btc_liquidations = self.cg.exchange_liquidations(symbol="BTC", time_type="h1")
+        self.assertIn("shortRate", btc_liquidations.columns)
+        self.assertIn("longRate", btc_liquidations.columns)
+        self.assertIn("exchangeName", btc_liquidations.columns)
 
-    def test_ahr999(self) -> None:
-        ahr999 = self.cg.ahr999()
-        self.assertIn("ahr999", ahr999.columns)
+    def test_liquidations_history(self) -> None:
+        btc_liquidations = self.cg.liquidations_history(symbol="BTC", time_type="h1")
+        self.assertIn(('list', 'Binance', 'exchangeName'), btc_liquidations.index)
+        self.assertIn(('list', 'OKX', 'sellQty'), btc_liquidations.index)
 
-    def test_tow_year_ma_multiplier(self) -> None:
-        tymm = self.cg.tow_year_ma_multiplier()
-        self.assertIn("mA730Mu5", tymm.columns)
-        self.assertIn("mA730", tymm.columns)
+    def test_exchange_long_short_ratio(self) -> None:
+        btc_long_short_ratio = self.cg.exchange_long_short_ratio(symbol="BTC", time_type="h1")
+        self.assertIn(('list', 'Binance', 'exchangeName'), btc_long_short_ratio.index)
+        self.assertIn(('list', 'Kraken', 'shortVolUsd'), btc_long_short_ratio.index)
 
-    def test_tow_hundred_week_moving_avg_heatmap(self) -> None:
-        thwmah = self.cg.tow_hundred_week_moving_avg_heatmap()
-        self.assertIn("mA1440", thwmah.columns)
+    def test_long_short_ratio_history(self) -> None:
+        btc_long_short_ratio = self.cg.long_short_ratio_history(symbol="BTC", time_type="h1")
+        self.assertIn("sellQty", btc_long_short_ratio.columns)
+        self.assertIn("longRateList", btc_long_short_ratio.columns)
 
-    def test_puell_multiple(self) -> None:
-        pm = self.cg.puell_multiple()
-        self.assertIn("puellMultiple", pm.columns)
+    def test_futures_coins_markets(self) -> None:
+        futures_coins = self.cg.futures_coins_markets()
+        self.assertIn("exchangeName", futures_coins.columns)
+        self.assertIn("avgFundingRate", futures_coins.columns)
+        self.assertIn("avgFundingRateByVol", futures_coins.columns)
 
-    def test_stock_flow(self) -> None:
-        sf = self.cg.stock_flow()
-        self.assertIn("stockFlow365dAverage", sf.columns)
-        self.assertIn("nextHalving", sf.columns)
+    def test_futures_coins_price_change(self) -> None:
+        futures_coins = self.cg.futures_coins_price_change()
+        self.assertIn("m5PriceChangePercent", futures_coins.columns)
+        self.assertIn("m15PriceChangePercent", futures_coins.columns)
+        self.assertIn("h1PriceChangePercent", futures_coins.columns)
 
-    def test_pi(self) -> None:
-        pi = self.cg.pi()
-        self.assertIn("ma350Mu2", pi.columns)
-        self.assertIn("ma110", pi.columns)
+    def test_futures_basis_chart(self) -> None:
+        futures_basis = self.cg.futures_basis_chart(symbol="BTC")
+        self.assertIn(('PERPETUAL', 'name'), futures_basis.index)
+        self.assertIn(('QUARTER', 'name'), futures_basis.index)
 
-    def test_golden_ratio_multiplier(self) -> None:
-        grm = self.cg.golden_ratio_multiplier()
-        self.assertIn("3LowBullHigh", grm.columns)
-        self.assertIn("x8", grm.columns)
-        self.assertIn("x21", grm.columns)
+    def test_futures_vol(self) -> None:
+        futures_vol = self.cg.futures_vol(symbol="BTC", time_type="h1")
+        self.assertIn(('dataMap', 'Binance'), futures_vol.columns)
+        self.assertIn(('dataMap', 'Deribit'), futures_vol.columns)
 
-    def test_bitcoin_profitable_days(self) -> None:
-        bpd = self.cg.bitcoin_profitable_days()
-        self.assertIn("side", bpd.columns)
-
-    def test_log_log_regression(self) -> None:
-        llr = self.cg.log_log_regression()
-        self.assertIn("Fib9098Dev", llr.columns)
-        self.assertIn("Oscillator", llr.columns)
-        self.assertIn("HighDev", llr.columns)
-
-    def test_grayscale_market_history(self) -> None:
-        gmh = self.cg.grayscale_market_history()
-        self.assertIn("markerPriceList", gmh.columns)
-        self.assertIn("premiumRateList", gmh.columns)
