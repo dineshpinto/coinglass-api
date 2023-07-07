@@ -1,15 +1,7 @@
 import pandas as pd
 import requests
 
-
-class RequiresUpgradedPlanException(Exception):
-    """ Raised when an endpoint requires an upgraded plan """
-    pass
-
-
-class RateLimitExceededException(Exception):
-    """ Raised when rate limit is exceeded """
-    pass
+from .exceptions import RequiresUpgradedPlanException, RateLimitExceededException
 
 
 class CoinglassAPI:
@@ -128,15 +120,15 @@ class CoinglassAPI:
     def _flatten_dictionary(data: dict) -> dict:
         flattened_dict = {}
 
-        for k, v in data.items():
-            if isinstance(v, dict):
-                for outer_key, outer_value in v.items():
-                    if isinstance(outer_value, list):
-                        flattened_dict[(k, outer_key)] = outer_value
+        for outer_key, outer_value in data.items():
+            if isinstance(outer_value, dict):
+                for inner_key, inner_value in outer_value.items():
+                    if isinstance(inner_value, list):
+                        flattened_dict[(outer_key, inner_key)] = inner_value
                     else:
-                        flattened_dict[outer_key] = outer_value
+                        flattened_dict[inner_key] = inner_value
             else:
-                flattened_dict[(k, 0)] = v
+                flattened_dict[(outer_key, 0)] = outer_value
 
         return flattened_dict
 
@@ -144,13 +136,14 @@ class CoinglassAPI:
     def _check_for_errors(response: dict) -> None:
         """ Check for errors in response """
         if not response["success"]:
-            match int(response["code"]):
+            code, msg = int(response["code"]), response["msg"]
+            match code:
                 case 40001:
-                    raise RequiresUpgradedPlanException(response['msg'])
+                    raise RequiresUpgradedPlanException(msg)
                 case 50001:
-                    raise RateLimitExceededException(response['msg'])
+                    raise RateLimitExceededException(msg)
                 case _:
-                    raise Exception(f"Code {response['code']}: {response['msg']}")
+                    raise Exception(f"Code {code}: {msg}")
 
     def perpetual_market(self, symbol: str) -> pd.DataFrame:
         response = self._get(

@@ -7,9 +7,9 @@
 
 ## Unofficial Python client for Coinglass API
 
-Wrapper around the [Coinglass API](https://coinglass.com/pricing) to fetch data about the crypto markets.
+Wrapper around the [Coinglass API](https://coinglass.com/pricing) to fetch data about crypto derivatives.
 All data is output in pandas DataFrames (single or multi-index) and all time-series data uses a `DateTimeIndex`.
-Supports all CoinGlass API endpoints.
+Supports all Coinglass API endpoints.
 
 ![Example Plot](https://github.com/dineshpinto/coinglass-api/blob/main/examples/example_plot.jpg?raw=true)
 
@@ -38,13 +38,13 @@ fr_btc_dydx = cg.funding(ex="dYdX", pair="ETH-USD", interval="h8")
 # Get average funding for BTC
 fr_avg_btc = cg.funding_average(symbol="BTC", interval="h4")
 
-# Get funding OHLC for ETHUSDT on Binance
+# Get funding OHLC for ETH-USDT on Binance
 fr_ohlc_eth_binance = cg.funding_ohlc(ex="Binance", pair="ETHUSDT", interval="h4")
 
 # Get aggregated OI OHLC data for BTC
 oi_agg_eth = cg.open_interest_aggregated_ohlc(symbol="ETH", interval="h4")
 
-# Get OHLC liquidations data for ETHUSDT on dYdX
+# Get OHLC liquidations data for ETH-USD on dYdX
 liq_ohlc_eth_dydx = cg.liquidation_pair(ex="dYdX", pair="ETH-USD", interval="h4")
 
 # Get liquidation data for BTC
