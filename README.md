@@ -1,4 +1,5 @@
 # Coinglass API
+
 [![PyPi version](https://img.shields.io/pypi/v/coinglass-api)](https://pypi.python.org/pypi/coinglass-api/)
 [![Downloads](https://pepy.tech/badge/coinglass-api)](https://pepy.tech/project/coinglass-api)
 [![codecov](https://codecov.io/gh/dineshpinto/coinglass-api/branch/main/graph/badge.svg?token=XTJRRU2W1T)](https://codecov.io/gh/dineshpinto/coinglass-api)
@@ -7,9 +8,8 @@
 ## Unofficial Python client for Coinglass API
 
 Wrapper around the [Coinglass API](https://coinglass.com/pricing) to fetch data about the crypto markets.
-All data is output in pandas DataFrames (single or multi-index) and all time series data uses a `DateTimeIndex`.
-
-**Note**: Currently supports the `indicator` and `index` API endpoints.
+All data is output in pandas DataFrames (single or multi-index) and all time-series data uses a `DateTimeIndex`.
+Supports all CoinGlass API endpoints.
 
 ![Example Plot](https://github.com/dineshpinto/coinglass-api/blob/main/examples/example_plot.jpg?raw=true)
 
@@ -25,6 +25,12 @@ pip install coinglass-api
 from coinglass_api import CoinglassAPI
 
 cg = CoinglassAPI(coinglass_secret="abcd1234")
+
+# Get perpetual markets for BTC
+perp_markets_btc = cg.perpetual_market(symbol="BTC")
+
+# Get OI history
+oi_history_btc = cg.open_interest_history(symbol="BTC", time_type="h1", currency="USD")
 
 # Funding rate of ETH on dYdX
 fr_btc_dydx = cg.funding(ex="dYdX", pair="ETH-USD", interval="h8")
@@ -88,6 +94,7 @@ memory usage: 19.5+ KB
 ```
 >>> cg.funding(ex="dYdX", pair="ETH-USD", interval="h8").plot(y="fundingRate")
 ```
+
 ![funding_rate](https://github.com/dineshpinto/coinglass-api/blob/main/examples/funding_rate.jpg?raw=true)
 
 ## Disclaimer
