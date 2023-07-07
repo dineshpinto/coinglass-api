@@ -38,16 +38,16 @@ jobs:
         run: |
           poetry run coverage run -m unittest tests.test_api -v
           poetry run coverage xml
-      - name: Sleep for 20 seconds
-        run: sleep 20s
+      - name: Sleep for 60 seconds
+        run: sleep 60s
         shell: bash
       - name: Test Indicator Endpoint
         env:
           COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
         run: |
           poetry run coverage run -a -m unittest tests.test_indicator_endpoint -v
-      - name: Sleep for 20 seconds
-        run: sleep 20s
+      - name: Sleep for 60 seconds
+        run: sleep 60s
         shell: bash
       - name: Test Index Endpoint
         env:
