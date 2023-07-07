@@ -1,3 +1,3 @@
-from .api import CoinglassAPI
+from .api import CoinglassAPI, RequiresUpgradedPlanException
 
-__all__ = ["CoinglassAPI"]
+__all__ = ["CoinglassAPI", "RequiresUpgradedPlanException"]

@@ -2,6 +2,16 @@ import pandas as pd
 import requests
 
 
+class RequiresUpgradedPlanException(Exception):
+    """ Raised when an endpoint requires an upgraded plan """
+    pass
+
+
+class RateLimitExceededException(Exception):
+    """ Raised when rate limit is exceeded """
+    pass
+
+
 class CoinglassAPI:
     """ Unofficial Python client for Coinglass API """
 
@@ -70,12 +80,16 @@ class CoinglassAPI:
         return df
 
     @staticmethod
-    def _create_multiindex_dataframe(data: list[dict], list_key: str) -> pd.DataFrame:
+    def _create_multiindex_dataframe(
+            data: list[dict],
+            list_key: str
+    ) -> pd.DataFrame:
         """
         Create MultiIndex pandas DataFrame from a list of nested dicts
 
         Args:
             data: list of nested dicts
+            list_key: key in dict that contains list of dicts
 
         Returns:
             dict of pandas DataFrame
@@ -130,7 +144,13 @@ class CoinglassAPI:
     def _check_for_errors(response: dict) -> None:
         """ Check for errors in response """
         if not response["success"]:
-            raise Exception(f"Code {response['code']}: {response['msg']}")
+            match int(response["code"]):
+                case 40001:
+                    raise RequiresUpgradedPlanException(response['msg'])
+                case 50001:
+                    raise RateLimitExceededException(response['msg'])
+                case _:
+                    raise Exception(f"Code {response['code']}: {response['msg']}")
 
     def perpetual_market(self, symbol: str) -> pd.DataFrame:
         response = self._get(
@@ -159,6 +179,16 @@ class CoinglassAPI:
         return self._create_multiindex_dataframe(data, list_key="symbol")
 
     def funding_usd_history(self, symbol: str, time_type: str) -> list[dict]:
+        """
+        Get funding history in USD for a coin
+
+        Args:
+            symbol: Coin symbol (e.g. BTC)
+            time_type: Time type (e.g. m1, m5, h8)
+
+        Returns:
+            List of dicts
+        """
         response = self._get(
             endpoint="funding_usd_history",
             params={"symbol": symbol, "time_type": time_type}
@@ -168,6 +198,16 @@ class CoinglassAPI:
         return data
 
     def funding_coin_history(self, symbol: str, time_type: str) -> list[dict]:
+        """
+        Get funding history in coin for a coin
+
+        Args:
+            symbol: Coin symbol (e.g. BTC)
+            time_type: Time type (e.g. m1, m5, h8)
+
+        Returns:
+            List of dicts
+        """
         response = self._get(
             endpoint="funding_coin_history",
             params={"symbol": symbol, "time_type": time_type}
@@ -185,7 +225,23 @@ class CoinglassAPI:
         data = response["data"]
         return self._create_dataframe(data)
 
-    def open_interest_history(self, symbol: str, time_type: str, currency: str) -> pd.DataFrame:
+    def open_interest_history(
+            self,
+            symbol: str,
+            time_type: str,
+            currency: str
+    ) -> pd.DataFrame:
+        """
+        Get open interest history
+
+        Args:
+            symbol: Coin symbol (e.g. BTC)
+            time_type: Time type (e.g. m1, m5, h8, all)
+            currency: Currency (e.g. USD or symbol)
+
+        Returns:
+            pandas DataFrame
+        """
         response = self._get(
             endpoint="open_interest_history",
             params={"symbol": symbol, "time_type": time_type, "currency": currency}
@@ -221,6 +277,16 @@ class CoinglassAPI:
         return self._create_dataframe(data)
 
     def option_history(self, symbol: str, currency: str) -> pd.DataFrame:
+        """
+        Get option history
+
+        Args:
+            symbol: Coin symbol (e.g. BTC)
+            currency: Currency (e.g. USD or symbol)
+
+        Returns:
+            pandas DataFrame
+        """
         response = self._get(
             endpoint="option_history",
             params={"symbol": symbol, "currency": currency}
@@ -240,13 +306,22 @@ class CoinglassAPI:
         )
         self._check_for_errors(response)
         data = response["data"]
-        df = pd.DataFrame(self._flatten_dictionary(data[0]))
+        df = pd.DataFrame(self._flatten_dictionary(data))
         df["time"] = pd.to_datetime(df["dateList"][0], unit="ms")
         df.drop(columns=["dateList"], inplace=True, level=0)
         df.set_index("time", inplace=True, drop=True)
         return df
 
     def top_liquidations(self, time_type: str) -> pd.DataFrame:
+        """
+        Get top liquidations
+
+        Args:
+            time_type: Time type (e.g. h1, h4, h12, h24)
+
+        Returns:
+            pandas DataFrame
+        """
         response = self._get(
             endpoint="liquidation_top",
             params={"time_type": time_type}
@@ -280,6 +355,7 @@ class CoinglassAPI:
         )
         self._check_for_errors(response)
         data = response["data"]
+        # TODO: Improve formatting
         return self._create_multiindex_dataframe(data, list_key="createTime")
 
     def exchange_long_short_ratio(self, symbol: str, time_type: str) -> pd.DataFrame:
@@ -289,16 +365,17 @@ class CoinglassAPI:
         )
         self._check_for_errors(response)
         data = response["data"]
+        # TODO: Improve formatting
         return self._create_multiindex_dataframe(data, list_key="symbol")
 
-    def long_short_ratio_history(self, symbol: str, time_type: str) -> list[dict]:
+    def long_short_ratio_history(self, symbol: str, time_type: str) -> pd.DataFrame:
         response = self._get(
             endpoint="long_short_history",
             params={"symbol": symbol, "time_type": time_type}
         )
         self._check_for_errors(response)
         data = response["data"]
-        return data
+        return self._create_dataframe(data, time_col="dateList")
 
     def futures_coins_markets(self) -> pd.DataFrame:
         response = self._get(
@@ -355,6 +432,16 @@ class CoinglassAPI:
         return pd.concat(flattened_data, axis=1)
 
     def futures_vol(self, symbol: str, time_type: str) -> pd.DataFrame:
+        """
+        Get futures volume
+
+        Args:
+            symbol: Coin symbol (e.g. BTC, ETH, LTC, etc.)
+            time_type: Time type (e.g. h1, h4, h12, h24, all)
+
+        Returns:
+            pandas DataFrame
+        """
         response = self._get(
             endpoint="futures_vol",
             params={"symbol": symbol, "time_type": time_type}
@@ -365,7 +452,7 @@ class CoinglassAPI:
         df["time"] = pd.to_datetime(df["dateList"][0], unit="ms")
         df.drop(columns=["dateList"], inplace=True, level=0)
         df.set_index("time", inplace=True, drop=True)
-        return data
+        return df
 
     def funding(
             self,
