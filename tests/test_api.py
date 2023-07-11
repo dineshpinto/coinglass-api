@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 
-from coinglass_api import CoinglassAPI, RequiresUpgradedPlanException
+from coinglass_api import CoinglassAPI, CoinglassRequestException
 
 
 class TestAPI(TestCase):
@@ -24,11 +24,11 @@ class TestAPI(TestCase):
         self.assertIn("openInterestAmount", btc_futs.columns)
 
     def test_funding_usd_history(self) -> None:
-        with self.assertRaises(RequiresUpgradedPlanException):
+        with self.assertRaises(CoinglassRequestException):
             self.cg.funding_usd_history(symbol="BTC", time_type="m1")
 
     def test_funding_coin_history(self) -> None:
-        with self.assertRaises(RequiresUpgradedPlanException):
+        with self.assertRaises(CoinglassRequestException):
             self.cg.funding_coin_history(symbol="BTC", time_type="m1")
 
     def test_open_interest(self) -> None:
@@ -38,7 +38,7 @@ class TestAPI(TestCase):
         self.assertIn("h4OIChangePercent", btc_oi.columns)
 
     def test_open_interest_history(self) -> None:
-        with self.assertRaises(RequiresUpgradedPlanException):
+        with self.assertRaises(CoinglassRequestException):
             self.cg.open_interest_history(symbol="BTC", time_type="m1", currency="USD")
 
     def test_option(self):

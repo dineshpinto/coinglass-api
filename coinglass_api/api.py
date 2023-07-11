@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
 
-from .exceptions import RequiresUpgradedPlanException, RateLimitExceededException
+from .exceptions import CoinglassAPIException, CoinglassRequestException, RateLimitExceededException
 
 
 class CoinglassAPI:
@@ -16,7 +16,7 @@ class CoinglassAPI:
         self._base_url = "https://open-api.coinglass.com/public/v2/"
         self._session = requests.Session()
 
-    def _get(self, endpoint: str, params: dict = None) -> dict:
+    def _get(self, endpoint: str, params: dict | None = None) -> dict:
         headers = {
             "accept": "application/json",
             "coinglassSecret": self.__coinglass_secret
@@ -135,15 +135,19 @@ class CoinglassAPI:
     @staticmethod
     def _check_for_errors(response: dict) -> None:
         """ Check for errors in response """
+
+        if "success" not in response.keys():
+            # Handle error case
+            raise CoinglassAPIException(status=response["status"], error=response["error"])
+
         if not response["success"]:
+            # Handle unsuccessful response
             code, msg = int(response["code"]), response["msg"]
             match code:
-                case 40001:
-                    raise RequiresUpgradedPlanException(msg)
                 case 50001:
-                    raise RateLimitExceededException(msg)
+                    raise RateLimitExceededException()
                 case _:
-                    raise Exception(f"Code {code}: {msg}")
+                    raise CoinglassRequestException(code=code, msg=msg)
 
     def perpetual_market(self, symbol: str) -> pd.DataFrame:
         response = self._get(

@@ -1,4 +1,9 @@
 from .api import CoinglassAPI
-from .exceptions import RateLimitExceededException, RequiresUpgradedPlanException
+from .exceptions import CoinglassAPIException, RateLimitExceededException, CoinglassRequestException
 
-__all__ = ["CoinglassAPI", "RequiresUpgradedPlanException", "RateLimitExceededException"]
+__all__ = [
+    "CoinglassAPI",
+    "CoinglassAPIException",
+    "CoinglassRequestException",
+    "RateLimitExceededException"
+]
