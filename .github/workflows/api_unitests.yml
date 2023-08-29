@@ -53,9 +53,6 @@ jobs:
           COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
         run: |
           poetry run coverage run -a -m unittest tests.test_index_endpoint -v
-      - name: Sleep for 60 seconds
-        run: sleep 60s
-        shell: bash
       - name: Test Exceptions
         env:
           COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
