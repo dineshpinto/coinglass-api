@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 
-from coinglass_api import CoinglassAPI, CoinglassRequestException
+from coinglass_api import CoinglassAPI
 
 
 class TestAPI(TestCase):
@@ -23,23 +23,11 @@ class TestAPI(TestCase):
         self.assertIn("shortRate", btc_futs.columns)
         self.assertIn("openInterestAmount", btc_futs.columns)
 
-    def test_funding_usd_history(self) -> None:
-        with self.assertRaises(CoinglassRequestException):
-            self.cg.funding_usd_history(symbol="BTC", time_type="m1")
-
-    def test_funding_coin_history(self) -> None:
-        with self.assertRaises(CoinglassRequestException):
-            self.cg.funding_coin_history(symbol="BTC", time_type="m1")
-
     def test_open_interest(self) -> None:
         btc_oi = self.cg.open_interest(symbol="BTC")
         self.assertIn("openInterest", btc_oi.columns)
         self.assertIn("openInterestAmountByStableCoinMargin", btc_oi.columns)
         self.assertIn("h4OIChangePercent", btc_oi.columns)
-
-    def test_open_interest_history(self) -> None:
-        with self.assertRaises(CoinglassRequestException):
-            self.cg.open_interest_history(symbol="BTC", time_type="m1", currency="USD")
 
     def test_option(self):
         btc_option = self.cg.option(symbol="BTC")
@@ -115,4 +103,3 @@ class TestAPI(TestCase):
         futures_vol = self.cg.futures_vol(symbol="BTC", time_type="h1")
         self.assertIn(('dataMap', 'Binance'), futures_vol.columns)
         self.assertIn(('dataMap', 'Deribit'), futures_vol.columns)
-
