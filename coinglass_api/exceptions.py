@@ -35,4 +35,5 @@ class NoDataReturnedException(CoinglassRequestException):
 
 
 class CoinglassParameterWarning(Warning):
+    """ Warning for (potentially) invalid parameters """
     pass

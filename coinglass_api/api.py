@@ -2,7 +2,7 @@ import pandas as pd
 import requests
 
 from .exceptions import CoinglassAPIException, CoinglassRequestException, RateLimitExceededException, NoDataReturnedException
-from .parameter_validation import CoinglassParameterValidation
+from .parameters import CoinglassParameterValidation
 
 
 class CoinglassAPI(CoinglassParameterValidation):

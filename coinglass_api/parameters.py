@@ -6,8 +6,8 @@ from .exceptions import CoinglassParameterWarning
 class CoinglassParameterValidation:
     def __init__(self):
         self.exchanges: list[str] = [
-            'Binance', 'Bitmex', 'Bybit', 'Bitget', 'Bitfinex', 'Coinbase Pro', 'CoinEx', 'CME', 'Deribit', 'dYdX',
-            'Huobi', 'Gate', 'Gemini', 'Kraken', 'LedgerX', 'OKX', 'CME', 'Bit.com'
+            'Binance', 'Coinbase Pro', 'Huobi', 'Kraken', 'Bitfinex', 'Bitmex', 'Bybit', 'Bitget',  'CoinEx', 'CME', 'Deribit', 'dYdX',
+            'Gate', 'Gemini',  'LedgerX', 'OKX', 'CME', 'Bit.com'
         ]
 
         self.symbols: list[str] = [
@@ -30,25 +30,28 @@ class CoinglassParameterValidation:
         ]
 
         self.time_types: list[str] = [
-            'm1', 'm5', 'm15', 'm30', 'h1', 'h4', 'h8', 'h12', 'h24'
+            'h1', 'h4', 'h8', 'h12', 'h24', 'm1', 'm5', 'm15', 'm30',
         ]
 
-    def add_exchange(self, exchange):
+    def add_exchange(self, exchange: str):
         self.exchanges.append(exchange)
 
-    def add_symbol(self, symbol):
+    def add_symbol(self, symbol: str):
         self.symbols.append(symbol)
 
-    def add_interval(self, interval):
-        self.time_types.append(interval)
+    def add_time_type(self, time_type: str):
+        self.time_types.append(time_type)
 
     def get_exchanges(self):
+        """ Returns list of exchanges """
         return self.exchanges
 
     def get_symbols(self):
+        """ Returns list of symbols """
         return self.symbols
 
     def get_time_types(self):
+        """ Returns list of time types """
         return self.time_types
 
     def _validate_exchange(self, exchange: str):
