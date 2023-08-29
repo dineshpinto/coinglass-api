@@ -37,7 +37,6 @@ jobs:
           COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
         run: |
           poetry run coverage run -m unittest tests.test_api -v
-          poetry run coverage xml
       - name: Sleep for 60 seconds
         run: sleep 60s
         shell: bash
@@ -54,6 +53,14 @@ jobs:
           COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
         run: |
           poetry run coverage run -a -m unittest tests.test_index_endpoint -v
+      - name: Sleep for 60 seconds
+        run: sleep 60s
+        shell: bash
+      - name: Test Exceptions
+        env:
+          COINGLASS_SECRET: ${{ secrets.COINGLASS_SECRET }}
+        run: |
+          poetry run coverage run -a -m unittest tests.test_exceptions -v
           poetry run coverage xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
