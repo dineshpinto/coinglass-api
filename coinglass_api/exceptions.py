@@ -21,7 +21,18 @@ class CoinglassRequestException(Exception):
 
 
 class RateLimitExceededException(CoinglassRequestException):
-    """ Raised when rate limit is exceeded """
+    """ Raised when API rate limit is exceeded """
 
     def __init__(self):
         super().__init__(code=50001, msg="")
+
+
+class NoDataReturnedException(CoinglassRequestException):
+    """ Raised when no data is returned from API """
+
+    def __init__(self):
+        super().__init__(code=0, msg="API request returned no data")
+
+
+class CoinglassParameterWarning(Warning):
+    pass

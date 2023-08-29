@@ -1,10 +1,11 @@
 import pandas as pd
 import requests
 
-from .exceptions import CoinglassAPIException, CoinglassRequestException, RateLimitExceededException
+from .exceptions import CoinglassAPIException, CoinglassRequestException, RateLimitExceededException, NoDataReturnedException
+from .parameter_validation import CoinglassParameterValidation
 
 
-class CoinglassAPI:
+class CoinglassAPI(CoinglassParameterValidation):
     """ Unofficial Python client for Coinglass API """
 
     def __init__(self, coinglass_secret: str):
@@ -12,11 +13,17 @@ class CoinglassAPI:
         Args:
             coinglass_secret: key from Coinglass, get one at https://www.coinglass.com/pricing
         """
+
+        super().__init__()
+
         self.__coinglass_secret = coinglass_secret
         self._base_url = "https://open-api.coinglass.com/public/v2/"
         self._session = requests.Session()
 
     def _get(self, endpoint: str, params: dict | None = None) -> dict:
+        if params:
+            self.validate_params(params)
+
         headers = {
             "accept": "application/json",
             "coinglassSecret": self.__coinglass_secret
@@ -136,18 +143,22 @@ class CoinglassAPI:
     def _check_for_errors(response: dict) -> None:
         """ Check for errors in response """
 
+        # Handle case where unable to communicate with API
         if "success" not in response.keys():
-            # Handle error case
             raise CoinglassAPIException(status=response["status"], error=response["error"])
 
+        # Handle case where API response is unsuccessful
         if not response["success"]:
-            # Handle unsuccessful response
             code, msg = int(response["code"]), response["msg"]
             match code:
                 case 50001:
                     raise RateLimitExceededException()
                 case _:
                     raise CoinglassRequestException(code=code, msg=msg)
+
+        # Handle case where API returns no data
+        if "data" not in response.keys():
+            raise NoDataReturnedException()
 
     def perpetual_market(self, symbol: str) -> pd.DataFrame:
         response = self._get(
