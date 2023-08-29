@@ -338,10 +338,36 @@ class CoinglassAPI(CoinglassParameterValidation):
         data = response["data"]
         return self._create_dataframe(data)
 
+    def liquidation_map(self, symbol: str, interval: str) -> dict:
+        response = self._get(
+            endpoint="liqMap",
+            params={"symbol": symbol, "interval": interval}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return data
+
     def liquidation_info(self, symbol: str, time_type: str) -> dict:
         response = self._get(
             endpoint="liquidation_info",
             params={"symbol": symbol, "time_type": time_type}
+        )
+        self._check_for_errors(response)
+        data = response["data"]
+        return data
+
+    def liquidation_order(
+            self,
+            ex_name: str,
+            coin: str,
+            vol_usd: str,
+            start_time: int,
+            end_time: int
+    ) -> dict:
+        response = self._get(
+            endpoint="liqMap",
+            params={"ex_name": ex_name, "coin": coin, "vol_usd": vol_usd,
+                    "start_time": start_time, "end_time": end_time}
         )
         self._check_for_errors(response)
         data = response["data"]
