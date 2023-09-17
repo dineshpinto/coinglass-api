@@ -1,15 +1,15 @@
-class CoinglassAPIException(Exception):
+class CoinglassAPIError(Exception):
     """ Generic exception for API communication """
 
-    def __init__(self, status: int, error: str):
+    def __init__(self, status: int, err: str):
         self.status = status
-        self.error = error
+        self.err = err
 
     def __str__(self):
-        return f"(status={self.status}) {self.error}"
+        return f"(status={self.status}) {self.err}"
 
 
-class CoinglassRequestException(Exception):
+class CoinglassRequestError(Exception):
     """ Generic exception for API requests """
 
     def __init__(self, code: int, msg: str):
@@ -20,14 +20,14 @@ class CoinglassRequestException(Exception):
         return f"(code={self.code}) {self.msg}"
 
 
-class RateLimitExceededException(CoinglassRequestException):
+class RateLimitExceededError(CoinglassRequestError):
     """ Raised when API rate limit is exceeded """
 
     def __init__(self):
         super().__init__(code=50001, msg="")
 
 
-class NoDataReturnedException(CoinglassRequestException):
+class NoDataReturnedError(CoinglassRequestError):
     """ Raised when no data is returned from API """
 
     def __init__(self):
@@ -36,4 +36,3 @@ class NoDataReturnedException(CoinglassRequestException):
 
 class CoinglassParameterWarning(Warning):
     """ Warning for (potentially) invalid parameters """
-    pass

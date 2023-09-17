@@ -1,7 +1,14 @@
+from typing import Optional
+
 import pandas as pd
 import requests
 
-from .exceptions import CoinglassAPIException, CoinglassRequestException, RateLimitExceededException, NoDataReturnedException
+from .exceptions import (
+    CoinglassAPIError,
+    CoinglassRequestError,
+    NoDataReturnedError,
+    RateLimitExceededError,
+)
 from .parameters import CoinglassParameterValidation
 
 
@@ -11,7 +18,8 @@ class CoinglassAPI(CoinglassParameterValidation):
     def __init__(self, coinglass_secret: str):
         """
         Args:
-            coinglass_secret: key from Coinglass, get one at https://www.coinglass.com/pricing
+            coinglass_secret: key from Coinglass, get one at
+            https://www.coinglass.com/pricing
         """
 
         super().__init__()
@@ -101,9 +109,9 @@ class CoinglassAPI(CoinglassParameterValidation):
             for outer_key, outer_value in symbol_data.items():
                 if isinstance(outer_value, list):
                     for exchange in outer_value:
-                        exchange_name = exchange["exchangeName"]
+                        ex = exchange["exchangeName"]
                         for inner_key, value in exchange.items():
-                            flattened_dict[(outer_key, exchange_name, inner_key)] = value
+                            flattened_dict[(outer_key, ex, inner_key)] = value
                 else:
                     flattened_dict[outer_key] = outer_value
 
@@ -144,21 +152,24 @@ class CoinglassAPI(CoinglassParameterValidation):
         """ Check for errors in response """
 
         # Handle case where unable to communicate with API
-        if "success" not in response.keys():
-            raise CoinglassAPIException(status=response["status"], error=response["error"])
+        if "success" not in response:
+            raise CoinglassAPIError(
+                status=response["status"],
+                err=response["error"]
+            )
 
         # Handle case where API response is unsuccessful
         if not response["success"]:
             code, msg = int(response["code"]), response["msg"]
             match code:
                 case 50001:
-                    raise RateLimitExceededException()
+                    raise RateLimitExceededError()
                 case _:
-                    raise CoinglassRequestException(code=code, msg=msg)
+                    raise CoinglassRequestError(code=code, msg=msg)
 
         # Handle case where API returns no data
-        if "data" not in response.keys():
-            raise NoDataReturnedException()
+        if "data" not in response:
+            raise NoDataReturnedError()
 
     def perpetual_market(self, symbol: str) -> pd.DataFrame:
         response = self._get(
@@ -494,16 +505,16 @@ class CoinglassAPI(CoinglassParameterValidation):
             pair: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Funding rate for a given pair
 
         Args:
-            ex: exchange to get funding rate for (e.g. Binance, dYdX, etc.)
-            pair: pair to get funding rate for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
-            interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            ex: exchange to get funding rate (e.g. Binance, dYdX, etc.)
+            pair: pair to get funding rate (e.g. BTCUSDT on Binance, BTC-USD on dYdX)
+            interval: interval to get funding rate (e.g. m1, m5, m15, m30, h1, h4, etc.)
             limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
@@ -526,16 +537,16 @@ class CoinglassAPI(CoinglassParameterValidation):
             pair: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Funding rate in OHLC format for an exchange pair
 
         Args:
-            ex: exchange to get funding rate for (e.g. Binance, dYdX, etc.)
-            pair: pair to get funding rate for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
-            interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            ex: exchange to get funding rate (e.g. Binance, dYdX, etc.)
+            pair: pair to get funding rate (e.g. BTCUSDT on Binance, BTC-USD on dYdX)
+            interval: interval to get funding rate (e.g. m1, m5, m15, m30, h1, h4)
             limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
@@ -557,15 +568,15 @@ class CoinglassAPI(CoinglassParameterValidation):
             symbol: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Average funding rate for a symbol
 
         Args:
             symbol: symbol to get funding rate for
-            interval: interval to get funding rate for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            interval: interval to get funding rate (e.g. m1, m5, m15, m30, h1, h4, etc.)
             limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
@@ -588,8 +599,8 @@ class CoinglassAPI(CoinglassParameterValidation):
             pair: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Open interest in OHLC format for an exchange pair
@@ -619,8 +630,8 @@ class CoinglassAPI(CoinglassParameterValidation):
             symbol: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Aggregated open interest in OHLC format for a symbol
@@ -649,15 +660,15 @@ class CoinglassAPI(CoinglassParameterValidation):
             symbol: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Liquidation data for a symbol
 
         Args:
             symbol: symbol to get liquidation data for
-            interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            interval: interval to get liquidation data (e.g. m1, m5, m15, m30, h1, h4)
             limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
@@ -680,16 +691,16 @@ class CoinglassAPI(CoinglassParameterValidation):
             pair: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Liquidation data for an exchange pair
 
         Args:
             ex: exchange to get liquidation data for (e.g. Binance, dYdX, etc.)
-            pair: pair to get liquidation data for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
-            interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            pair: pair to get liquidation data (e.g. BTCUSDT on Binance,BTC-USD on dYdX)
+            interval: interval to get liquidation data (e.g. m1, m5, m15, m30, h1, h4)
             limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
@@ -712,16 +723,16 @@ class CoinglassAPI(CoinglassParameterValidation):
             pair: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Long/short ratio for an exchange pair
 
         Args:
             ex: exchange to get liquidation data for (e.g. Binance, dYdX, etc.)
-            pair: pair to get liquidation data for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
-            interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            pair: pair to get liquidation data (e.g. BTCUSDT on Binance,BTC-USD on dYdX)
+            interval: interval to get liquidation data (e.g. m1, m5, m15, m30, h1, h4)
             limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
@@ -743,15 +754,15 @@ class CoinglassAPI(CoinglassParameterValidation):
             symbol: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Long/short ratio for a symbol
 
         Args:
             symbol: symbol to get long/short ratio for
-            interval: interval to get long/short ratio for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            interval: interval to get long/short ratio (e.g. m1, m5, m15, m30, h1, h4)
             limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
@@ -774,16 +785,16 @@ class CoinglassAPI(CoinglassParameterValidation):
             pair: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Top accounts long/short ratio for an exchange pair
 
         Args:
             ex: exchange to get liquidation data for (e.g. Binance, dYdX, etc.)
-            pair: pair to get liquidation data for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
-            interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            pair: pair to get liquidation data (e.g. BTCUSDT on Binance,BTC-USD on dYdX)
+            interval: interval to get liquidation data (e.g. m1, m5, m15, m30, h1, h4)
             limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
@@ -806,16 +817,16 @@ class CoinglassAPI(CoinglassParameterValidation):
             pair: str,
             interval: str,
             limit: int = 500,
-            start_time: int = None,
-            end_time: int = None
+            start_time: Optional[int] = None,
+            end_time: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Top positions long/short ratio for an exchange pair
 
         Args:
             ex: exchange to get liquidation data for (e.g. Binance, dYdX, etc.)
-            pair: pair to get liquidation data for (e.g. BTCUSDT on Binance, BTC-USD on dYdX, etc.)
-            interval: interval to get liquidation data for (e.g. m1, m5, m15, m30, h1, h4, etc.)
+            pair: pair to get liquidation data (e.g. BTCUSDT on Binance,BTC-USD on dYdX)
+            interval: interval to get liquidation data (e.g. m1, m5, m15, m30, h1, h4)
             limit: number of data points to return (default: 500)
             start_time: start time in milliseconds
             end_time: end time in milliseconds
@@ -886,7 +897,8 @@ class CoinglassAPI(CoinglassParameterValidation):
         )
         self._check_for_errors(response)
         data = response["data"]
-        return self._create_dataframe(data, time_col="createTime", cast_objects_to_numeric=True)
+        return self._create_dataframe(data, time_col="createTime",
+                                      cast_objects_to_numeric=True)
 
     def golden_ratio_multiplier(self) -> pd.DataFrame:
         response = self._get(
@@ -894,7 +906,8 @@ class CoinglassAPI(CoinglassParameterValidation):
         )
         self._check_for_errors(response)
         data = response["data"]
-        return self._create_dataframe(data, time_col="createTime", cast_objects_to_numeric=True)
+        return self._create_dataframe(data, time_col="createTime",
+                                      cast_objects_to_numeric=True)
 
     def bitcoin_profitable_days(self) -> pd.DataFrame:
         response = self._get(

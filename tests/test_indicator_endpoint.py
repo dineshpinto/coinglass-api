@@ -22,7 +22,9 @@ class TestIndicatorEndpoint(TestCase):
         self.assertTrue("fundingRate" in fr_btc_dydx.columns)
 
     def test_funding_ohlc(self) -> None:
-        fr_ohlc_eth_binance = self.cg.funding_ohlc(ex="Binance", pair="ETHUSDT", interval="h4")
+        fr_ohlc_eth_binance = self.cg.funding_ohlc(
+            ex="Binance", pair="ETHUSDT", interval="h4"
+        )
         self.assertEqual(fr_ohlc_eth_binance.shape[0], 500)
         self.assertTrue("o" in fr_ohlc_eth_binance.columns)
         self.assertTrue("h" in fr_ohlc_eth_binance.columns)
@@ -35,7 +37,9 @@ class TestIndicatorEndpoint(TestCase):
         self.assertIn("fundingRate", fr_avg_eth.columns)
 
     def test_open_interest_ohlc(self) -> None:
-        oi_ohlc_eth_binance = self.cg.open_interest_ohlc(ex="Binance", pair="ETHUSDT", interval="h4")
+        oi_ohlc_eth_binance = self.cg.open_interest_ohlc(
+            ex="Binance", pair="ETHUSDT", interval="h4"
+        )
         self.assertEqual(oi_ohlc_eth_binance.shape[0], 500)
         self.assertIn("o", oi_ohlc_eth_binance.columns)
         self.assertIn("h", oi_ohlc_eth_binance.columns)
@@ -43,7 +47,9 @@ class TestIndicatorEndpoint(TestCase):
         self.assertIn("c", oi_ohlc_eth_binance.columns)
 
     def test_open_interest_aggregated_ohlc(self) -> None:
-        oi_ohlc_eth_binance = self.cg.open_interest_aggregated_ohlc(symbol="ETH", interval="h4")
+        oi_ohlc_eth_binance = self.cg.open_interest_aggregated_ohlc(
+            symbol="ETH", interval="h4"
+        )
         self.assertEqual(oi_ohlc_eth_binance.shape[0], 500)
         self.assertIn("o", oi_ohlc_eth_binance.columns)
         self.assertIn("h", oi_ohlc_eth_binance.columns)
@@ -65,7 +71,9 @@ class TestIndicatorEndpoint(TestCase):
         self.assertIn("sellVolUsd", liq_eth.columns)
 
     def test_long_short_accounts(self) -> None:
-        lsa_eth = self.cg.long_short_accounts(ex="Binance", pair="ETHUSDT", interval="h4")
+        lsa_eth = self.cg.long_short_accounts(
+            ex="Binance", pair="ETHUSDT", interval="h4"
+        )
         self.assertEqual(lsa_eth.shape[0], 500)
         self.assertIn("longRatio", lsa_eth.columns)
         self.assertIn("shortRatio", lsa_eth.columns)
@@ -77,14 +85,18 @@ class TestIndicatorEndpoint(TestCase):
         self.assertIn("v", lsa_eth.columns)
 
     def test_top_long_short_account_ratio(self) -> None:
-        lsa_eth = self.cg.top_long_short_account_ratio(ex="Binance", pair="ETHUSDT", interval="h4")
+        lsa_eth = self.cg.top_long_short_account_ratio(
+            ex="Binance", pair="ETHUSDT", interval="h4"
+        )
         self.assertEqual(lsa_eth.shape[0], 500)
         self.assertIn("longRatio", lsa_eth.columns)
         self.assertIn("shortRatio", lsa_eth.columns)
         self.assertIn("longShortRatio", lsa_eth.columns)
 
     def test_top_long_short_position_ratio(self) -> None:
-        lsa_eth = self.cg.top_long_short_position_ratio(ex="Binance", pair="ETHUSDT", interval="h4")
+        lsa_eth = self.cg.top_long_short_position_ratio(
+            ex="Binance", pair="ETHUSDT", interval="h4"
+        )
         self.assertEqual(lsa_eth.shape[0], 500)
         self.assertIn("longRatio", lsa_eth.columns)
         self.assertIn("shortRatio", lsa_eth.columns)

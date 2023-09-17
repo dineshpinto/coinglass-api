@@ -73,12 +73,22 @@ class TestAPI(TestCase):
         self.assertIn(('list', 'OKX', 'sellQty'), btc_liquidations.index)
 
     def test_exchange_long_short_ratio(self) -> None:
-        btc_long_short_ratio = self.cg.exchange_long_short_ratio(symbol="BTC", time_type="h1")
-        self.assertIn(('list', 'Binance', 'exchangeName'), btc_long_short_ratio.index)
-        self.assertIn(('list', 'Kraken', 'shortVolUsd'), btc_long_short_ratio.index)
+        btc_long_short_ratio = self.cg.exchange_long_short_ratio(
+            symbol="BTC", time_type="h1"
+        )
+        self.assertIn(
+            ('list', 'Binance', 'exchangeName'),
+            btc_long_short_ratio.index
+        )
+        self.assertIn(
+            ('list', 'Kraken', 'shortVolUsd'),
+            btc_long_short_ratio.index
+        )
 
     def test_long_short_ratio_history(self) -> None:
-        btc_long_short_ratio = self.cg.long_short_ratio_history(symbol="BTC", time_type="h1")
+        btc_long_short_ratio = self.cg.long_short_ratio_history(
+            symbol="BTC", time_type="h1"
+        )
         self.assertIn("sellQty", btc_long_short_ratio.columns)
         self.assertIn("longRateList", btc_long_short_ratio.columns)
 

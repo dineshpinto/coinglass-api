@@ -5,49 +5,52 @@ from .exceptions import CoinglassParameterWarning
 
 class CoinglassParameterValidation:
     def __init__(self):
-        self.exchanges: list[str] = [
-            'Binance', 'OKX', 'dYdX', 'Bitget', 'Bybit', 'BingX', 'Bitmex', 'Bitfinex', 'Deribit', 'CoinEx', 'Kraken',
-            'Huobi'
+        self._exchanges: list[str] = [
+            'Binance', 'OKX', 'dYdX', 'Bitget', 'Bybit', 'BingX', 'Bitmex', 'Bitfinex',
+            'Deribit', 'CoinEx', 'Kraken', 'Huobi'
         ]
 
-        self.time_types: list[str] = [
-            'h1', 'h2', 'h4', 'h6', 'h8', 'h12', 'h24', 'm1', 'm3', 'm5', 'm15', 'm30', '1d', '7d'
+        self._time_types: list[str] = [
+            'h1', 'h2', 'h4', 'h6', 'h8', 'h12', 'h24', 'm1', 'm3', 'm5', 'm15', 'm30',
+            '1d', '7d'
         ]
 
     def add_exchange(self, exchange: str):
-        self.exchanges.append(exchange)
+        self._exchanges.append(exchange)
 
     def add_time_type(self, time_type: str):
-        self.time_types.append(time_type)
+        self._time_types.append(time_type)
 
-    def get_exchanges(self):
+    def get_exchanges(self) -> list[str]:
         """ Returns list of exchanges """
-        return self.exchanges
+        return self._exchanges
 
-    def get_time_types(self):
+    def get_time_types(self) -> list[str]:
         """ Returns list of time types """
-        return self.time_types
+        return self._time_types
 
     def _validate_exchange(self, exchange: str):
-        if exchange not in self.exchanges:
+        if exchange not in self._exchanges:
             warnings.warn(
-                f"Exchange '{exchange}' not in predefined exchange list: {self.exchanges}",
-                CoinglassParameterWarning
+                f"'{exchange}' not in exchange list: {self._exchanges}",
+                CoinglassParameterWarning,
+                stacklevel=2
             )
 
     def _validate_time_type(self, time_type: str):
-        if time_type not in self.time_types:
+        if time_type not in self._time_types:
             warnings.warn(
-                f"Time type '{time_type}' not in predefined time type list: {self.time_types}",
-                CoinglassParameterWarning
+                f"'{time_type}' not in time type list: {self._time_types}",
+                CoinglassParameterWarning,
+                stacklevel=2
             )
 
     def validate_params(self, params: dict):
-        if "ex" in params.keys():
+        if "ex" in params:
             self._validate_exchange(params["ex"])
-        elif "ex_name" in params.keys():
+        elif "ex_name" in params:
             self._validate_exchange(params["ex_name"])
-        if "time_type" in params.keys():
+        if "time_type" in params:
             self._validate_time_type(params["time_type"])
-        elif "interval" in params.keys():
+        elif "interval" in params:
             self._validate_time_type(params["interval"])
