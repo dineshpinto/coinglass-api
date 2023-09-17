@@ -16,12 +16,24 @@ class TestExceptions(TestCase):
     def tearDown(self) -> None:
         self.cg._session.close()
 
-    def test_coinglass_request_exception(self) -> None:
+    def test_open_interest_history(self) -> None:
         with self.assertRaises(CoinglassRequestError):
             self.cg.open_interest_history(symbol="BTC", time_type="m1", currency="USD")
+
+    def test_funding_usd_history(self) -> None:
+        with self.assertRaises(CoinglassRequestError):
             self.cg.funding_usd_history(symbol="BTC", time_type="m1")
+
+    def test_funding_coin_history(self) -> None:
+        with self.assertRaises(CoinglassRequestError):
             self.cg.funding_coin_history(symbol="BTC", time_type="m1")
+
+    def test_liquidation_map(self) -> None:
+        with self.assertRaises(CoinglassRequestError):
             self.cg.liquidation_map(symbol="Binance_BTCUSDT", interval="1d")
+
+    def test_liquidation_order(self) -> None:
+        with self.assertRaises(CoinglassRequestError):
             self.cg.liquidation_order(ex_name="Binance", coin="BTC", vol_usd="1000",
                                       start_time=1693323421369, end_time=1693333421369)
 
