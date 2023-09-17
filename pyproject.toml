@@ -19,6 +19,7 @@ requests = "^2.28.2"
 jupyterlab = "^3.5.2"
 matplotlib = "^3.5.2"
 seaborn = "^0.11.2"
+ruff = "^0.0.290"
 
 
 [tool.poetry.group.test.dependencies]
@@ -27,3 +28,19 @@ coverage = "^7.2.5"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+extend-select = [
+    "B", # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "ERA", # flake8-eradicate/eradicate
+    "I", # isort
+    "N", # pep8-naming
+    "PIE", # flake8-pie
+    "PGH", # pygrep
+    "RUF", # ruff checks
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "TID", # flake8-tidy-imports
+    "UP", # pyupgrade
+]
