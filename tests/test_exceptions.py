@@ -30,11 +30,13 @@ class TestExceptions(TestCase):
             self.cg.futures_market(symbol="ZEC")
 
     def test_warning_message(self) -> None:
-        with self.assertWarns(CoinglassParameterWarning):
-            with self.assertRaises(CoinglassRequestError):
-                self.cg.open_interest_ohlc(
-                    ex="NotAnExchange", pair="BTCUSDT", interval="h1"
-                )
+        with (
+            self.assertWarns(CoinglassParameterWarning),
+            self.assertRaises(CoinglassRequestError)
+        ):
+            self.cg.open_interest_ohlc(
+                ex="NotAnExchange", pair="BTCUSDT", interval="h1"
+            )
 
     def test_exchanges(self) -> None:
         exchanges = self.cg.get_exchanges()
