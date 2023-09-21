@@ -20,6 +20,7 @@ jupyterlab = "^3.5.2"
 matplotlib = "^3.5.2"
 seaborn = "^0.11.2"
 ruff = "^0.0.290"
+ruff-lsp = "^0.0.39"
 
 
 [tool.poetry.group.test.dependencies]
