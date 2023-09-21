@@ -923,7 +923,7 @@ class CoinglassAPI(CoinglassParameterValidation):
         )
         self._check_for_errors(response)
         data = response["data"]
-        return self._create_dataframe(data, time_col="createTime")
+        return self._create_dataframe(data)
 
     def grayscale_market_history(self) -> pd.DataFrame:
         response = self._get(

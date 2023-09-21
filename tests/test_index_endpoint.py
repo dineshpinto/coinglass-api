@@ -54,9 +54,9 @@ class TestIndexEndpoint(TestCase):
 
     def test_log_log_regression(self) -> None:
         llr = self.cg.log_log_regression()
-        self.assertIn("Fib9098Dev", llr.columns)
-        self.assertIn("Oscillator", llr.columns)
-        self.assertIn("HighDev", llr.columns)
+        self.assertIn("model_price", llr.columns)
+        self.assertIn("price", llr.columns)
+        self.assertIn("maximum_bubble_territory", llr.columns)
 
     def test_grayscale_market_history(self) -> None:
         gmh = self.cg.grayscale_market_history()
