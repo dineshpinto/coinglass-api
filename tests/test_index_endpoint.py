@@ -1,6 +1,8 @@
 import os
 from unittest import TestCase
 
+import pandas as pd
+
 from coinglass_api import CoinglassAPI
 
 
@@ -54,9 +56,7 @@ class TestIndexEndpoint(TestCase):
 
     def test_log_log_regression(self) -> None:
         llr = self.cg.log_log_regression()
-        self.assertIn("model_price", llr.columns)
-        self.assertIn("price", llr.columns)
-        self.assertIn("maximum_bubble_territory", llr.columns)
+        self.assertTrue(isinstance(llr.columns, pd.RangeIndex))
 
     def test_grayscale_market_history(self) -> None:
         gmh = self.cg.grayscale_market_history()

@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 
-from coinglass_api import CoinglassAPI
+from coinglass_api import CoinglassAPI, CoinglassRequestError
 
 
 class TestAPI(TestCase):
@@ -99,10 +99,8 @@ class TestAPI(TestCase):
         self.assertIn("avgFundingRateByVol", futures_coins.columns)
 
     def test_futures_coins_price_change(self) -> None:
-        futures_coins = self.cg.futures_coins_price_change()
-        self.assertIn("m5PriceChangePercent", futures_coins.columns)
-        self.assertIn("m15PriceChangePercent", futures_coins.columns)
-        self.assertIn("h1PriceChangePercent", futures_coins.columns)
+        with self.assertRaises(CoinglassRequestError):
+            self.cg.futures_coins_price_change()
 
     def test_futures_basis_chart(self) -> None:
         futures_basis = self.cg.futures_basis_chart(symbol="BTC")

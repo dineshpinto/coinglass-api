@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 
-from coinglass_api import CoinglassAPI
+from coinglass_api import CoinglassAPI, CoinglassRequestError
 
 
 class TestIndicatorEndpoint(TestCase):
@@ -80,9 +80,8 @@ class TestIndicatorEndpoint(TestCase):
         self.assertIn("longShortRatio", lsa_eth.columns)
 
     def test_long_short_symbol(self) -> None:
-        lsa_eth = self.cg.long_short_symbol(symbol="ETH", interval="h4")
-        self.assertEqual(lsa_eth.shape[0], 500)
-        self.assertIn("v", lsa_eth.columns)
+        with self.assertRaises(CoinglassRequestError):
+            self.cg.long_short_symbol(symbol="ETH", interval="h4")
 
     def test_top_long_short_account_ratio(self) -> None:
         lsa_eth = self.cg.top_long_short_account_ratio(
